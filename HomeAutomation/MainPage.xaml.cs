@@ -12,6 +12,10 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Devices.AllJoyn;
+using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.Rfcomm;
+using Windows.Devices.Enumeration;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -27,15 +31,33 @@ namespace HomeAutomation
             this.InitializeComponent();
         }
 
-        private void button_Click(object sender, RoutedEventArgs e)
+        private void hamburger_menu_click(object sender, RoutedEventArgs e)
         {
-            textBlock.Text = textBox.Text;
-           
+
+            //slider.Visibility = Visibility.Visible;
+            slider.IsPaneOpen = true;
+          
         }
 
-        private void slider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-            rect1.Width = slider.Value;
-        }
+
+
+
+
+        /*    private async void button_Click(object sender, RoutedEventArgs e)
+             {
+                 string[] requestedProperties = new string[] { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected" };
+                 var deviceList = await DeviceInformation.FindAllAsync("(System.Devices.Aep.ProtocolId:=\"{e0cbf06c-cd8b-4647-bb8a-263b43f0f974}\")",
+                                                                 requestedProperties,
+                                                                 DeviceInformationKind.AssociationEndpoint);
+                 foreach (var deviceInfo in deviceList)
+                 {
+                     listBox.Items.Add(deviceInfo.Id);
+                     listBox.Items.Add(deviceInfo.Name);
+                     listBox.Items.Add("----------");
+                 }
+
+             }*/
     }
+
 }
+

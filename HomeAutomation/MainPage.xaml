@@ -8,11 +8,37 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="150,245,0,0" VerticalAlignment="Top" Click="button_Click"/>
-        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="35,75,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="110"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="190,75,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="126"/>
-        <Rectangle x:Name="rect1" Fill="#FF1D1DD8" HorizontalAlignment="Left" Height="40" Margin="70,155,0,0" Stroke="Black" VerticalAlignment="Top" Width="175"/>
-        <Slider x:Name="slider" HorizontalAlignment="Left" Margin="70,350,0,0" VerticalAlignment="Top" Width="180" ValueChanged="slider_ValueChanged"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" MinHeight="50"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
 
+
+        <SplitView Name="slider" Grid.Row="1" IsPaneOpen="False">
+            <SplitView.Pane>
+                <RelativePanel>
+                    <TextBlock Name="Home" Text="Home" Style="{StaticResource SubheaderTextBlockStyle}" Width="100px" Height="50px" Margin="10,0,0,0"/>
+                    <TextBlock Name="Seting" Text="Setting" Style="{StaticResource SubheaderTextBlockStyle}" Width="100px" Height="50px" Margin="10,50,0,0"/>
+
+                </RelativePanel>
+            </SplitView.Pane>
+
+        </SplitView>
+
+
+
+        <StackPanel Name="Header" Orientation="Horizontal" >
+            <Border Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Grid.Row="0" >
+                <ToggleButton Name="hamburger_menu" VerticalAlignment="Stretch" Width="42" Margin="0,0,0,2" Click="hamburger_menu_click" IsChecked="False" >
+                    <ToggleButton.Content>
+                        <FontIcon x:Name="Hamburger" FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" Margin="0,10,0,0" Height="20" VerticalAlignment="Top"/>
+                    </ToggleButton.Content>
+                </ToggleButton>
+
+            </Border>
+            <TextBlock x:Name="Header_text" Text="Header text box" 
+                       Style="{StaticResource TitleTextBlockStyle}"
+                       Margin="10" />
+        </StackPanel>
     </Grid>
 </Page>
