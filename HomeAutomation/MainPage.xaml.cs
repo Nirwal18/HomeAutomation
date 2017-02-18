@@ -33,16 +33,8 @@ namespace HomeAutomation
 
         private void hamburger_menu_click(object sender, RoutedEventArgs e)
         {
-
-            //slider.Visibility = Visibility.Visible;
-            slider.IsPaneOpen = true;
-          
+            slider.IsPaneOpen = !slider.IsPaneOpen;
         }
-
-
-
-
-
         /*    private async void button_Click(object sender, RoutedEventArgs e)
              {
                  string[] requestedProperties = new string[] { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected" };
