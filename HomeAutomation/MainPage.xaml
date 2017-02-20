@@ -15,9 +15,11 @@
            
         </Grid.RowDefinitions>
        
-            <StackPanel Name="Header" Orientation="Horizontal" Background="{StaticResource AppBarBackgroundThemeBrush}" >
-            <Border Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" Grid.Row="0" >
-                <ToggleButton Name="hamburgerMenu_btn" VerticalAlignment="Stretch" Width="42" Margin="0,0,0,2" Click="hamburger_menu_click" IsChecked="True" >
+        
+        
+            <StackPanel Name="Header" Orientation="Horizontal" Background="{ThemeResource AppBarBackgroundThemeBrush}">
+            <Border Background="{ThemeResource AppBarBorderThemeBrush }" Grid.Row="0" >
+                <ToggleButton Name="hamburgerMenu_btn" VerticalAlignment="Stretch" Width="40" Margin="0,0,0,2" Click="hamburger_menu_click" IsChecked="True" >
                     <ToggleButton.Content>
                         <FontIcon x:Name="Hamburger" FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" Margin="0,10,0,0" Height="20" VerticalAlignment="Top"/>
                     </ToggleButton.Content>
@@ -25,24 +27,27 @@
 
             </Border>
             <TextBlock x:Name="Header_text" Text="Header text box" 
+                       Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
                        Style="{StaticResource TitleTextBlockStyle}"
+                      
                        Margin="10" />
             </StackPanel>
 
+        
+        
         <RelativePanel Grid.Row="1" Grid.Column="0" >
 
             <SplitView Name="slider" Grid.Row="1" IsPaneOpen="True"
-                  Background="Gray" 
-                   BorderBrush="DarkGray" BorderThickness="1"
+                   BorderBrush="DarkGray" BorderThickness="2"
                        RelativePanel.AlignTopWithPanel="True"
                        RelativePanel.AlignBottomWithPanel="True"
                       RelativePanel.AlignRightWithPanel="True"
                        RelativePanel.AlignLeftWithPanel="True">
                 <SplitView.Pane>
-                    <RelativePanel>
+                    <RelativePanel Name="pane">
                         <TextBlock Name="Home" Text="Home" Style="{StaticResource SubheaderTextBlockStyle}" Width="100px" Height="50px" Margin="10,0,0,0"/>
                         <TextBlock Name="Seting" Text="Setting" Style="{StaticResource SubheaderTextBlockStyle}" Width="100px" Height="50px" Margin="10,50,0,0"/>
-
+                        <Button Name="page2_btn" Content="Page2" Click="page2_btn_Click"/>
                     </RelativePanel>
                 </SplitView.Pane>
 
@@ -54,26 +59,29 @@
 
                 <!--- Status Bar -->
                 <RelativePanel Grid.Row="1">
-                    <Frame Name="Frame"
+                    <Frame Name="Frame_container"
                    RelativePanel.AlignTopWithPanel="True" 
                    RelativePanel.AlignLeftWithPanel="True"
                    RelativePanel.AlignRightWithPanel="True"
-                   RelativePanel.Above="StatusBar">
+                   RelativePanel.Above="StatusBoder">
 
                     </Frame>
-                    <StackPanel  Name="StatusBar"
-                     Grid.Row="1" Height="50"  
-                     Background="LightCyan" 
-                     Orientation="Vertical"
+                    <StackPanel  Name="StatusBoder"
+             
+                     Background="{ThemeResource AppBarBackgroundThemeBrush}" 
+                     Height="40"
                      RelativePanel.AlignRightWithPanel="True"
                      RelativePanel.AlignLeftWithPanel="True"
                      RelativePanel.AlignBottomWithPanel="True">
-
-                        <TextBlock Name="StatusBar_Text" Text="StatusBar_Text" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                    </StackPanel>
+                        <TextBlock x:Name="StatusBar_Text" Text="StatusBar_Text" 
+                                   Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
+                                   VerticalAlignment="Center" Margin="5,10,0,0" />
+                     </StackPanel>
                 </RelativePanel>
 
             </SplitView>
         </RelativePanel>
+        
+        
     </Grid>
 </Page>
