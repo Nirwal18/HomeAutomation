@@ -26,9 +26,11 @@ namespace HomeAutomation
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public static MainPage current;
         public MainPage()
         {
             this.InitializeComponent();
+            current = this;
             this.Loaded += MainPage_Loaded;
         }
 
@@ -38,6 +40,7 @@ namespace HomeAutomation
           //  throw new NotImplementedException();
         }
 
+
         private void hamburger_menu_click(object sender, RoutedEventArgs e)
         {
             slider.IsPaneOpen = !slider.IsPaneOpen;
@@ -45,35 +48,19 @@ namespace HomeAutomation
         }
 
 
-        /*    private async void button_Click(object sender, RoutedEventArgs e)
-             {
-                 string[] requestedProperties = new string[] { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected" };
-                 var deviceList = await DeviceInformation.FindAllAsync("(System.Devices.Aep.ProtocolId:=\"{e0cbf06c-cd8b-4647-bb8a-263b43f0f974}\")",
-                                                                 requestedProperties,
-                                                                 DeviceInformationKind.AssociationEndpoint);
-                 foreach (var deviceInfo in deviceList)
-                 {
-                     listBox.Items.Add(deviceInfo.Id);
-                     listBox.Items.Add(deviceInfo.Name);
-                     listBox.Items.Add("----------");
-                 }
+        
 
-             }*/
-
-            /// <summary>
-            /// to show Status bar warnning, sucess and Error state. Used in function StatsBar();
-            /// </summary>
-        enum barStatus { Error,Warnning,Sucess,Normal};
+       
 
 
         /// <summary>
         /// it is used to set property to bar.
         /// this function is used to set text and color on Status bar. Example : 
-        /// ststus =barStatus.Error    red, 
-        /// ststus =barStatus.warning  Yellow, 
-        /// ststus =barStatus.sucess   Green 
+        /// status =barStatus.Error    red, 
+        /// status =barStatus.warning  Yellow, 
+        /// status =barStatus.sucess   Green 
         /// </summary>
-        void StatusBar(string message,barStatus status)
+        public void StatusBar(string message,barStatus status)
         {
             switch (status)
             {
@@ -92,11 +79,21 @@ namespace HomeAutomation
                
         }
 
+
+
+
         private void page2_btn_Click(object sender, RoutedEventArgs e)
         {
             Frame_container.Navigate(typeof(Page2));
+           // StatusBar("device Added Event tiggred", barStatus.Sucess);
+
         }
     }
+
+    /// <summary>
+    /// To show Status bar warnning, sucess and Error state. Used in function StatusBar();
+    /// </summary>
+    public enum barStatus { Error, Warnning, Sucess, Normal };
 
 }
 

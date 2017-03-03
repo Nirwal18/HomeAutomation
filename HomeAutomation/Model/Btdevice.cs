@@ -1,31 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
 
 namespace HomeAutomation.Model
 {
-   public class Btdevice
+    public class Btdevice : INotifyPropertyChanged
     {
-        public string Name { get; set; }
-        public int id { get; set; }
-    }
+        private DeviceInformation deviceInfo;
 
-    public class DeviceManager
-    {
-       public static List<Btdevice> GetDevice()
+        // class constructor
+        public Btdevice(DeviceInformation deviceInfonIn)
         {
-            var device = new List<Btdevice>();
-            device.Add(new Btdevice { Name = "phone 1", id = 0001 });
-            device.Add(new Btdevice { Name = "phone 2", id = 0002 });
-            device.Add(new Btdevice { Name = "phone 3", id = 0003 });
-            device.Add(new Btdevice { Name = "phone 4", id = 0004 });
-            device.Add(new Btdevice { Name = "phone 5", id = 0005 });
-            device.Add(new Btdevice { Name = "phone 6", id = 0006 });
-            return device;
+            deviceInfo = deviceInfonIn;
+        }
+
+        public string Name
+        {
+            get
+            {
+                return deviceInfo.Name;
+            }
+        }
+        public string Id
+        {
+            get
+            {
+                return deviceInfo.Id;
+            }
+        }
+
+
+        // interface implementation
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(name));
+            }
         }
 
     }
 
-}
+}  

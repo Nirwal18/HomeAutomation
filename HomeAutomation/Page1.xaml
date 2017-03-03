@@ -5,11 +5,16 @@
     xmlns:local="using:HomeAutomation"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:data="using:HomeAutomation.Model"
     mc:Ignorable="d">
     <Page.Resources>
-               
+        <DataTemplate x:DataType="data:Btdevice" x:Key="btlistTemplet">
+            <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Azure">
+                <TextBlock Text="{x:Bind Name}" Style="{ThemeResource TitleTextBlockStyle}" Foreground="Red" FontSize="25" HorizontalAlignment="Left"/>
+                <TextBlock Text="{x:Bind Id}" FontSize="20" HorizontalAlignment="Left"/>
+            </StackPanel>
+        </DataTemplate>
     </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
@@ -23,16 +28,13 @@
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" >
-            <Border BorderBrush="AntiqueWhite" BorderThickness="1">
+            <Border BorderBrush="Aqua" BorderThickness="1">
+
                 <ListView Name="resultListView"
                           Visibility="Visible"
-                          
+                           ItemsSource="{x:Bind ResultCollection}"
+                          ItemTemplate="{StaticResource btlistTemplet}"
                           MaxHeight="450">
-                   
-                        
-                            <TextBlock FontSize="15" Text="device.Name"/>
-                       
-                    
                 </ListView>
             </Border>
         </ScrollViewer>
