@@ -30,7 +30,7 @@ namespace HomeAutomation
     public sealed partial class Page1 : Page
     {
         private MainPage rootPage = MainPage.current;
-        private List<Btdevice> device;
+        private BluetoothDevice bluetoothDevice;
         private DeviceWatcher deviceWatcher = null;
         public ObservableCollection<Btdevice> ResultCollection
         {
@@ -47,18 +47,52 @@ namespace HomeAutomation
 
         private  void Search_btn_Click(object sender, RoutedEventArgs e)
         {
-
-            BtWatcher();
-
-          /*  foreach (var deviceInfo in deviceList)
-            {
-                //listBox.Items.Add(deviceInfo.Id);
-                //listBox.Items.Add(deviceInfo.Name);
-                //listBox.Items.Add("----------");
-                resultListView.Items.Add(deviceInfo);
-            }
-               */       
+            Search_btn.IsEnabled = false;
+            BtWatcher();     
         }
+
+
+        private async void Connect_btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (resultListView.SelectedItem != null)
+            {
+                rootPage.StatusBar("connecting to Bluetooth device. Please wait...", barStatus.Sucess);
+            }
+            else
+            {
+                rootPage.StatusBar("Please Select any item from list to connect.", barStatus.Warnning);
+                return;
+            }
+
+            Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
+
+            DeviceAccessStatus accessStatus = DeviceAccessInformation.CreateFromId(btSelectedDevice.Id).CurrentStatus;
+
+            if (accessStatus == DeviceAccessStatus.DeniedByUser)
+            {
+                rootPage.StatusBar("This app does not have access to connect to the remote device (please grant access in Settings > Privacy > Other Devices", barStatus.Error);
+                return;
+            }
+
+            try
+            {
+                bluetoothDevice = await BluetoothDevice.FromIdAsync(btSelectedDevice.Id);
+            }
+            catch( Exception ex)
+            {
+                rootPage.StatusBar(ex.Message, barStatus.Error);
+                    return;
+            }
+
+
+            if (bluetoothDevice == null)
+            {
+                rootPage.StatusBar("Bluetooth Device returned null. Access Status = "+ accessStatus.ToString() , barStatus.Error);
+            }
+
+
+        }
+
 
 
 
@@ -89,32 +123,71 @@ namespace HomeAutomation
             // for updating UI from non UI thread.
             await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
 
-                rootPage.StatusBar("device Added Event tiggred", barStatus.Sucess);
                 ResultCollection.Add(new Btdevice(deviceInfo));
+                rootPage.StatusBar("Searching for Bluetooth devices...", barStatus.Sucess);
             });
 
            
         }
 
 
-        private void DeviceWatcher_Updated(DeviceWatcher sender, DeviceInformationUpdate args)
+        private async void DeviceWatcher_Updated(DeviceWatcher sender, DeviceInformationUpdate deviceUpdate)
         {
-            // throw new NotImplementedException();
+            // for updating UI from non UI thread.
+            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
+
+                foreach (Btdevice disp in ResultCollection)
+                {
+                    if(disp.Id == deviceUpdate.Id)
+                    {
+                        disp.Update(deviceUpdate);
+                        break;
+                    }
+                }
+            });
+           
         }
 
-        private void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
+        private async void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
         {
-            //throw new NotImplementedException();
+            // for updating UI from non UI thread.
+            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
+
+                rootPage.StatusBar(String.Format("Enumeration completed. {0} device found. ", ResultCollection.Count), barStatus.Normal);
+            });
         }
 
-        private void DeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
+        private async void DeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate deviceUpdate)
         {
-            throw new NotImplementedException();
+            // for updating UI from non UI thread.
+            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
+
+                foreach (Btdevice disp in ResultCollection)
+                {
+                    if (disp.Id == deviceUpdate.Id) 
+                    {
+                        ResultCollection.Remove(disp);
+                        break;
+                    }
+                }
+
+                rootPage.StatusBar(
+                        String.Format("{0} devices found.", ResultCollection.Count),
+                        barStatus.Sucess);
+
+            });
+           
         }
 
-        private void DeviceWatcher_Stopped(DeviceWatcher sender, object args)
+        private async void DeviceWatcher_Stopped(DeviceWatcher sender, object args)
         {
-            throw new NotImplementedException();
+            // for updating UI from non UI thread.
+            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
+                rootPage.StatusBar(String.Format("{0} device Found, Watcher {1}", ResultCollection.Count, DeviceWatcherStatus.Aborted == sender.Status ? "Aborted" : "Stopped"),
+                    barStatus.Error);
+                ResultCollection.Clear();
+            });
+          
         }
 
     }

@@ -10,9 +10,18 @@
     mc:Ignorable="d">
     <Page.Resources>
         <DataTemplate x:DataType="data:Btdevice" x:Key="btlistTemplet">
-            <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Azure">
-                <TextBlock Text="{x:Bind Name}" Style="{ThemeResource TitleTextBlockStyle}" Foreground="Red" FontSize="25" HorizontalAlignment="Left"/>
-                <TextBlock Text="{x:Bind Id}" FontSize="20" HorizontalAlignment="Left"/>
+            <StackPanel HorizontalAlignment="Stretch" Height="Auto" Width="1000" VerticalAlignment="Top">
+                <TextBlock Text="{x:Bind Name}" 
+                           Style="{ThemeResource TitleTextBlockStyle}" Foreground="Red"
+                           FontSize="25" HorizontalAlignment="Left" VerticalAlignment="Top"
+                           Margin="5,0,0,0"/>
+                <TextBlock Text="IsPared :" 
+                           FontSize="18"
+                            Margin="5,0,0,0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Bottom"/>
+                <TextBlock Text="{x:Bind IsPared}" Name="idTxt" Margin="35,0,0,0" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                
             </StackPanel>
         </DataTemplate>
     </Page.Resources>
@@ -25,6 +34,7 @@
         <StackPanel Grid.Row="0">
             <TextBlock Text="Click on Search Button to start Searching" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
             <Button Name="Search_btn" Click="Search_btn_Click" Content="Search" HorizontalAlignment="Left" VerticalContentAlignment="Top" Margin="15,10,0,0"/>
+            <Button Name="Connect_btn" Click="Connect_btn_Click" Content="Connect" HorizontalAlignment="Right" VerticalContentAlignment="Top" Margin="0,-30,15,10"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" >

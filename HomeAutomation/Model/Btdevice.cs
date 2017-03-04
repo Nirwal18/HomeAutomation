@@ -33,6 +33,19 @@ namespace HomeAutomation.Model
             }
         }
 
+        public bool IsPared
+        {
+            get
+            {
+                return deviceInfo.Pairing.IsPaired;
+            }
+        }
+
+        public void Update(DeviceInformationUpdate updateDevice)
+        {
+            deviceInfo.Update(updateDevice);
+        }
+
 
         // interface implementation
 
