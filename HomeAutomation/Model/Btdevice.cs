@@ -11,11 +11,27 @@ namespace HomeAutomation.Model
     public class Btdevice : INotifyPropertyChanged
     {
         private DeviceInformation deviceInfo;
-
+        public string pairBtnString;
         // class constructor
         public Btdevice(DeviceInformation deviceInfonIn)
         {
             deviceInfo = deviceInfonIn;
+            if(deviceInfonIn.Pairing.IsPaired)
+            {
+                pairBtnString = "Unpair";
+            }
+            else
+            {
+                pairBtnString = "Pair";
+            }
+        }
+
+        public DeviceInformation DeviceInformation
+        {
+            get
+            {
+                return deviceInfo;
+            }
         }
 
         public string Name
@@ -33,6 +49,7 @@ namespace HomeAutomation.Model
             }
         }
 
+
         public bool IsPared
         {
             get
@@ -40,6 +57,17 @@ namespace HomeAutomation.Model
                 return deviceInfo.Pairing.IsPaired;
             }
         }
+
+        public bool CanPair
+        {
+            get
+            {
+                return deviceInfo.Pairing.CanPair;
+            }
+        }
+
+
+
 
         public void Update(DeviceInformationUpdate updateDevice)
         {
@@ -60,5 +88,7 @@ namespace HomeAutomation.Model
         }
 
     }
+
+   
 
 }  

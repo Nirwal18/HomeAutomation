@@ -19,6 +19,8 @@ using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
 using System.Collections.ObjectModel;
+using Windows.Storage.Streams;
+using Windows.Networking.Sockets;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -30,8 +32,15 @@ namespace HomeAutomation
     public sealed partial class Page1 : Page
     {
         private MainPage rootPage = MainPage.current;
-        private BluetoothDevice bluetoothDevice;
+        private BluetoothDevice bluetoothDevice = null;
+        private BluetoothLEDevice bluetoothLeDevice;
         private DeviceWatcher deviceWatcher = null;
+        private RfcommDeviceService chatService = null;
+        private StreamSocket chatSocket;
+        private DataWriter chatWriter;
+        private RfcommDeviceService service;
+
+        //   public IAsyncOperation<DevicePairingResult> ParingResult;
         public ObservableCollection<Btdevice> ResultCollection
         {
             get;
@@ -48,56 +57,30 @@ namespace HomeAutomation
         private  void Search_btn_Click(object sender, RoutedEventArgs e)
         {
             Search_btn.IsEnabled = false;
-            BtWatcher();     
+            ResultCollection.Clear();
+            rootPage.StatusBar("Searching for bluetooth device", barStatus.Sucess);
+            BtWatcherStart();     
         }
 
 
-        private async void Connect_btn_Click(object sender, RoutedEventArgs e)
+        private void Connect_btn_Click(object sender, RoutedEventArgs e)
         {
-            if (resultListView.SelectedItem != null)
-            {
-                rootPage.StatusBar("connecting to Bluetooth device. Please wait...", barStatus.Sucess);
-            }
-            else
-            {
-                rootPage.StatusBar("Please Select any item from list to connect.", barStatus.Warnning);
-                return;
-            }
-
-            Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
-
-            DeviceAccessStatus accessStatus = DeviceAccessInformation.CreateFromId(btSelectedDevice.Id).CurrentStatus;
-
-            if (accessStatus == DeviceAccessStatus.DeniedByUser)
-            {
-                rootPage.StatusBar("This app does not have access to connect to the remote device (please grant access in Settings > Privacy > Other Devices", barStatus.Error);
-                return;
-            }
-
-            try
-            {
-                bluetoothDevice = await BluetoothDevice.FromIdAsync(btSelectedDevice.Id);
-            }
-            catch( Exception ex)
-            {
-                rootPage.StatusBar(ex.Message, barStatus.Error);
-                    return;
-            }
-
-
-            if (bluetoothDevice == null)
-            {
-                rootPage.StatusBar("Bluetooth Device returned null. Access Status = "+ accessStatus.ToString() , barStatus.Error);
-            }
-
-
+            //connect();
+            connect2();
         }
 
 
 
 
 
-        public void BtWatcher()
+   
+
+
+
+
+
+
+        public void BtWatcherStart()
         {
             // device requesting property
             string[] requestedProperties = new string[] { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected" };
@@ -115,6 +98,24 @@ namespace HomeAutomation
             // now watcher start working
             deviceWatcher.Start();
 
+        }
+
+        public void BtWatcherStop()
+        {
+            deviceWatcher.Added -= DeviceWatcher_Added;
+            deviceWatcher.Updated -= DeviceWatcher_Updated;
+            deviceWatcher.EnumerationCompleted -= DeviceWatcher_EnumerationCompleted;
+            deviceWatcher.Removed -= DeviceWatcher_Removed;
+            deviceWatcher.Stopped -= DeviceWatcher_Stopped;
+
+            if (DeviceWatcherStatus.Started == deviceWatcher.Status ||
+                DeviceWatcherStatus.EnumerationCompleted == deviceWatcher.Status)
+            {
+                deviceWatcher.Stop();
+            }
+            // update ui and enable btn
+            Search_btn.IsEnabled = true;
+            rootPage.StatusBar("Watcher Stoped", barStatus.Warnning);
         }
 
 
@@ -190,6 +191,326 @@ namespace HomeAutomation
           
         }
 
+       
+        private async void BtPair()
+        {                       
+            rootPage.StatusBar("Paring Started Please Wait...", barStatus.Warnning);
+
+            Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
+            DevicePairingResult dpr = await deviceInfoDisp.DeviceInformation.Pairing.PairAsync();
+
+            rootPage.StatusBar("Paring Result" + dpr.Status.ToString(), dpr.Status == DevicePairingResultStatus.Paired ? barStatus.Sucess : barStatus.Error);
+        }
+        private async void BtUnpair()
+        {
+            rootPage.StatusBar("Paring Started Please Wait...", barStatus.Warnning);
+
+            Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
+            DeviceUnpairingResult dupr = await deviceInfoDisp.DeviceInformation.Pairing.UnpairAsync();
+
+            rootPage.StatusBar("Unparing Result" + dupr.Status.ToString(), dupr.Status == DeviceUnpairingResultStatus.Unpaired ? barStatus.Sucess : barStatus.Error);
+                        
+        }
+
+        private void PairUnpair_btn_Click(object sender, RoutedEventArgs e)
+        {
+            resultListView.IsEnabled = false;
+           
+            Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
+            if (deviceInfoDisp == null)
+            {
+                rootPage.StatusBar("Please Select the device", barStatus.Error);
+                resultListView.IsEnabled = true;
+                return;
+            }
+            if (deviceInfoDisp.IsPared)
+            {
+                BtUnpair();
+            }
+            else
+            {
+                BtPair();
+            }
+            resultListView.IsEnabled = true;
+        }
+
+        private void send_btn_Click(object sender, RoutedEventArgs e)
+        {
+            SendMessage();
+        }
+
+        public async void connect()
+        {
+
+            // Make sure user has selected a device first
+            if (resultListView.SelectedItem != null)
+            {
+                rootPage.StatusBar("Connecting to remote device. Please wait...", barStatus.Sucess);
+            }
+            else
+            {
+                rootPage.StatusBar("Please select an item to connect to", barStatus.Error);
+                return;
+            }
+
+            Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
+
+            // Perform device access checks before trying to get the device.
+            // First, we check if consent has been explicitly denied by the user.
+            DeviceAccessStatus accessStatus = DeviceAccessInformation.CreateFromId(deviceInfoDisp.Id).CurrentStatus;
+            if (accessStatus == DeviceAccessStatus.DeniedByUser)
+            {
+                rootPage.StatusBar("This app does not have access to connect to the remote device (please grant access in Settings > Privacy > Other Devices", barStatus.Error);
+                return;
+            }
+
+            // If not, try to get the Bluetooth device
+            try
+            {
+                bluetoothDevice = await BluetoothDevice.FromIdAsync(deviceInfoDisp.Id);
+            }
+            catch (Exception ex)
+            {
+                rootPage.StatusBar(ex.Message, barStatus.Error);
+                return;
+            }
+
+            // If we were unable to get a valid Bluetooth device object,
+            // it's most likely because the user has specified that all unpaired devices
+            // should not be interacted with.
+            if (bluetoothDevice == null)
+            {
+                rootPage.StatusBar("Bluetooth Device returned null. Access Status = " + accessStatus.ToString(), barStatus.Error);
+            }
+
+            // This should return a list of uncached Bluetooth services (so if the server was not active when paired, it will still be detected by this call
+            var rfcommServices = await bluetoothDevice.GetRfcommServicesAsync();
+
+            if (rfcommServices.Services.Count > 0)
+            {
+                chatService = rfcommServices.Services[0];
+            }
+            else
+            {
+                rootPage.StatusBar(
+                   "Could not discover the chat service on the remote device",
+                   barStatus.Error);
+                return;
+            }
+
+            // Do various checks of the SDP record to make sure you are talking to a device that actually supports the Bluetooth Rfcomm Chat Service
+            var attributes = await chatService.GetSdpRawAttributesAsync();
+            if (!attributes.ContainsKey(Constants.SdpServiceNameAttributeId))
+            {
+                rootPage.StatusBar(
+                    "The Chat service is not advertising the Service Name attribute (attribute id=0x100). " +
+                    "Please verify that you are running the BluetoothRfcommChat server.",
+                    barStatus.Error);
+                Search_btn.IsEnabled = true;
+                return;
+            }
+
+            var attributeReader = DataReader.FromBuffer(attributes[Constants.SdpServiceNameAttributeId]);
+            var attributeType = attributeReader.ReadByte();
+            if (attributeType != Constants.SdpServiceNameAttributeType)
+            {
+                rootPage.StatusBar(
+                    "The Chat service is using an unexpected format for the Service Name attribute. " +
+                    "Please verify that you are running the BluetoothRfcommChat server.",
+                    barStatus.Error);
+                Search_btn.IsEnabled = true;
+                return;
+            }
+
+            var serviceNameLength = attributeReader.ReadByte();
+
+            // The Service Name attribute requires UTF-8 encoding.
+            attributeReader.UnicodeEncoding = UnicodeEncoding.Utf8;
+
+            deviceWatcher.Stop();
+
+            lock (this)
+            {
+                chatSocket = new StreamSocket();
+            }
+            try
+            {
+                await chatSocket.ConnectAsync(chatService.ConnectionHostName, chatService.ConnectionServiceName);
+
+                SetChatUI(attributeReader.ReadString(serviceNameLength), bluetoothDevice.Name);
+                chatWriter = new DataWriter(chatSocket.OutputStream);
+
+                DataReader chatReader = new DataReader(chatSocket.InputStream);
+                ResetUI();
+              //  ReceiveStringLoop(chatReader);
+            }
+            catch (Exception ex)
+            {
+                switch ((uint)ex.HResult)
+                {
+                    case (0x80070490): // ERROR_ELEMENT_NOT_FOUND
+                        rootPage.StatusBar("Please verify that you are running the BluetoothRfcommChat server.", barStatus.Error);
+                        Search_btn.IsEnabled = true;
+                        break;
+                    default:
+                        throw;
+                }
+            }
+        }
+
+        private void SetChatUI(string v, string name)
+        {
+            send_btn.IsEnabled = false;
+            resultListView.Visibility = Visibility.Collapsed;
+            conversionList.Visibility = Visibility.Visible;
+        }
+
+        private async void ReceiveStringLoop(DataReader chatReader)
+        {
+          try
+            {
+                uint size = await chatReader.LoadAsync(sizeof(uint));
+                if (size < sizeof(uint))
+                {
+                    Disconnect("Remote device terminated connection - make sure only one instance of server is running on remote device");
+                    return;
+                }
+
+                uint stringLength = chatReader.ReadUInt32();
+                uint actualStringLength = await chatReader.LoadAsync(stringLength);
+                if (actualStringLength != stringLength)
+                {
+                    // The underlying socket was closed before we were able to read the whole data
+                    return;
+                }
+
+                conversionList.Items.Add("Received: " + chatReader.ReadString(stringLength));
+
+             //   ReceiveStringLoop(chatReader);
+            }
+            catch (Exception ex)
+            {
+                lock (this)
+                {
+                    if (chatSocket == null)
+                    {
+                        // Do not print anything here -  the user closed the socket.
+                        // HResult = 0x80072745 - catch this (remote device disconnect) ex = {"An established connection was aborted by the software in your host machine. (Exception from HRESULT: 0x80072745)"}
+                    }
+                    else
+                    {
+                        Disconnect("Read stream failed with error: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+        private async void SendMessage()
+        {
+            try
+            {
+                if (message_box.Text.Length != 0)
+                {
+                    chatWriter.WriteUInt32((uint)message_box.Text.Length);
+                    chatWriter.WriteString(message_box.Text+"\n");
+
+                    conversionList.Items.Add("Sent: " + message_box.Text);
+                    message_box.Text = "";
+                    await chatWriter.StoreAsync();
+                     
+
+                }
+            }
+            catch (Exception ex) when ((uint)ex.HResult == 0x80072745)
+            {
+                // The remote device has disconnected the connection
+                rootPage.StatusBar("Remote side disconnect: " + ex.HResult.ToString() + " - " + ex.Message,
+                    barStatus.Warnning);
+            }
+        }
+
+        private void Disconnect(string disconnectReason)
+        {
+            //throw new NotImplementedException();
+            if (chatWriter != null)
+            {
+                chatWriter.DetachStream();
+                chatWriter = null;
+            }
+
+
+            if (chatService != null)
+            {
+                chatService.Dispose();
+                chatService = null;
+            }
+            lock (this)
+            {
+                if (chatSocket != null)
+                {
+                    chatSocket.Dispose();
+                    chatSocket = null;
+                }
+            }
+
+            rootPage.StatusBar(disconnectReason, barStatus.Warnning);
+            ResetUI();
+        }
+
+        private void ResetUI()
+        {
+            //throw new NotImplementedException();
+
+            send_btn.IsEnabled = true;
+            resultListView.Visibility = Visibility.Visible;
+            conversionList.Visibility = Visibility.Collapsed;
+        }
+
+
+        public async void connect2()
+        {
+            BtWatcherStop();
+            if (resultListView.SelectedItem == null)
+            {
+                rootPage.StatusBar("please selet an item to connect", barStatus.Error);
+                return;
+            }
+           
+                Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
+            if (btSelectedDevice == null)
+            {
+                rootPage.StatusBar("Connection device error", barStatus.Error);
+                return;
+            }
+            service = await RfcommDeviceService.FromIdAsync(btSelectedDevice.Id);
+                if (service == null)
+                {
+                    rootPage.StatusBar("Connection service error", barStatus.Error);
+                    return;
+                }
+
+                chatSocket = new StreamSocket();
+
+                if (chatSocket == null)
+                {
+                    rootPage.StatusBar("Connection chat soket error", barStatus.Error);
+                    return;
+                }
+
+                await chatSocket.ConnectAsync(service.ConnectionHostName, service.ConnectionServiceName, SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
+                rootPage.StatusBar("connection to device done sucessfully", barStatus.Sucess);
+          
+           
+        }
+
+
+
+
+
+
     }
 
+
+    
+    
 }
