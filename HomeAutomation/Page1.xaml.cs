@@ -21,6 +21,7 @@ using Windows.Devices.Enumeration;
 using System.Collections.ObjectModel;
 using Windows.Storage.Streams;
 using Windows.Networking.Sockets;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -33,12 +34,13 @@ namespace HomeAutomation
     {
         private MainPage rootPage = MainPage.current;
         private BluetoothDevice bluetoothDevice = null;
-        private BluetoothLEDevice bluetoothLeDevice;
+        
         private DeviceWatcher deviceWatcher = null;
         private RfcommDeviceService chatService = null;
-        private StreamSocket chatSocket;
-        private DataWriter chatWriter;
-        private RfcommDeviceService service;
+      
+        private StreamSocket _socket;
+        private DataWriter serialWriter;
+      //  private GattDeviceService service;
 
         //   public IAsyncOperation<DevicePairingResult> ParingResult;
         public ObservableCollection<Btdevice> ResultCollection
@@ -238,7 +240,7 @@ namespace HomeAutomation
         {
             SendMessage();
         }
-
+        /*
         public async void connect()
         {
 
@@ -284,7 +286,7 @@ namespace HomeAutomation
             }
 
             // This should return a list of uncached Bluetooth services (so if the server was not active when paired, it will still be detected by this call
-            var rfcommServices = await bluetoothDevice.GetRfcommServicesAsync();
+            var rfcommServices = await bluetoothDevice.GetRfcommServicesAsync(BluetoothCacheMode.Uncached);
 
             if (rfcommServices.Services.Count > 0)
             {
@@ -357,7 +359,7 @@ namespace HomeAutomation
                 }
             }
         }
-
+        */
         private void SetChatUI(string v, string name)
         {
             send_btn.IsEnabled = false;
@@ -386,13 +388,13 @@ namespace HomeAutomation
 
                 conversionList.Items.Add("Received: " + chatReader.ReadString(stringLength));
 
-             //   ReceiveStringLoop(chatReader);
+               ReceiveStringLoop(chatReader);
             }
             catch (Exception ex)
             {
                 lock (this)
                 {
-                    if (chatSocket == null)
+                    if (_socket == null)
                     {
                         // Do not print anything here -  the user closed the socket.
                         // HResult = 0x80072745 - catch this (remote device disconnect) ex = {"An established connection was aborted by the software in your host machine. (Exception from HRESULT: 0x80072745)"}
@@ -411,12 +413,12 @@ namespace HomeAutomation
             {
                 if (message_box.Text.Length != 0)
                 {
-                    chatWriter.WriteUInt32((uint)message_box.Text.Length);
-                    chatWriter.WriteString(message_box.Text+"\n");
+                    //serialWriter.WriteUInt32((uint)message_box.Text.Length);
+                    serialWriter.WriteString(message_box.Text+"\n");
 
                     conversionList.Items.Add("Sent: " + message_box.Text);
                     message_box.Text = "";
-                    await chatWriter.StoreAsync();
+                    await serialWriter.StoreAsync();
                      
 
                 }
@@ -432,10 +434,10 @@ namespace HomeAutomation
         private void Disconnect(string disconnectReason)
         {
             //throw new NotImplementedException();
-            if (chatWriter != null)
+            if (serialWriter != null)
             {
-                chatWriter.DetachStream();
-                chatWriter = null;
+              serialWriter.DetachStream();
+                serialWriter = null;
             }
 
 
@@ -446,10 +448,10 @@ namespace HomeAutomation
             }
             lock (this)
             {
-                if (chatSocket != null)
+                if (_socket != null)
                 {
-                    chatSocket.Dispose();
-                    chatSocket = null;
+                    _socket.Dispose();
+                    _socket = null;
                 }
             }
 
@@ -460,47 +462,71 @@ namespace HomeAutomation
         private void ResetUI()
         {
             //throw new NotImplementedException();
-
             send_btn.IsEnabled = true;
+            Search_btn.IsEnabled = true;
             resultListView.Visibility = Visibility.Visible;
-            conversionList.Visibility = Visibility.Collapsed;
+            conversionList.Visibility = Visibility.Visible;
         }
 
 
         public async void connect2()
         {
-            BtWatcherStop();
+           // checking if device is selected or not.
             if (resultListView.SelectedItem == null)
             {
                 rootPage.StatusBar("please selet an item to connect", barStatus.Error);
                 return;
             }
-           
-                Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
-            if (btSelectedDevice == null)
+            // selecting bluetooth device
+            Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
+
+            //initialize bluetooth device
+            var btDevice = await BluetoothDevice.FromIdAsync(btSelectedDevice.Id);
+
+            // checking device initiallized or not.
+            if (btDevice == null)
             {
                 rootPage.StatusBar("Connection device error", barStatus.Error);
                 return;
             }
-            service = await RfcommDeviceService.FromIdAsync(btSelectedDevice.Id);
-                if (service == null)
+            // getting service result from device regarding to serial port.
+            var _rfcomService = await btDevice.GetRfcommServicesForIdAsync(RfcommServiceId.SerialPort,BluetoothCacheMode.Uncached);
+                if (_rfcomService.Services.Count == 0)
                 {
-                    rootPage.StatusBar("Connection service error", barStatus.Error);
+                    rootPage.StatusBar("Serial service not found on device.", barStatus.Error);
                     return;
                 }
+                
 
-                chatSocket = new StreamSocket();
+            message_box.Text = _rfcomService.Services.Count().ToString();
+            // chat service storing from result arrey
+            chatService = _rfcomService.Services[0];
 
-                if (chatSocket == null)
-                {
-                    rootPage.StatusBar("Connection chat soket error", barStatus.Error);
-                    return;
-                }
+            BtWatcherStop();
 
-                await chatSocket.ConnectAsync(service.ConnectionHostName, service.ConnectionServiceName, SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
+            // socket assingment
+          lock(this) { _socket = new StreamSocket(); } // for marking this as crtical section.
+
+            message_box.Text = chatService.ServiceId.ToString();
+
+            try
+            {
+                // socket initializesd
+                await _socket.ConnectAsync(chatService.ConnectionHostName, chatService.ConnectionServiceName, SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
                 rootPage.StatusBar("connection to device done sucessfully", barStatus.Sucess);
-          
-           
+
+
+                SetChatUI(chatService.ServiceId.ToString(), btDevice.Name);
+
+                // reader and writer assingment.
+                 serialWriter = new DataWriter(_socket.OutputStream);
+                DataReader serialReader = new DataReader(_socket.InputStream);
+
+                ResetUI();
+                ReceiveStringLoop(serialReader);
+            }
+            catch(Exception ex)
+            { rootPage.StatusBar("Error : "+ex.ToString(), barStatus.Error); }
         }
 
 
