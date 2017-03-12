@@ -85,7 +85,10 @@
                 </ListView>
 
                 <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                    <TextBox Name="recive_txt"
+                              TextChanged="rcvdText_TextChanged"/>
                     <TextBox Name="message_box"
+                             
                              HorizontalAlignment="Stretch"/>
                     <Button Name="send_btn"
                             Content="Send"

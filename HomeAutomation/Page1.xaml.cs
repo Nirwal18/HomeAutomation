@@ -22,6 +22,9 @@ using System.Collections.ObjectModel;
 using Windows.Storage.Streams;
 using Windows.Networking.Sockets;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Devices.SerialCommunication;
+using System.Threading.Tasks;
+using System.Threading;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -34,13 +37,16 @@ namespace HomeAutomation
     {
         private MainPage rootPage = MainPage.current;
         private BluetoothDevice bluetoothDevice = null;
-        
+        private SerialDevice serialPort = null;
         private DeviceWatcher deviceWatcher = null;
         private RfcommDeviceService chatService = null;
-      
+       
         private StreamSocket _socket;
+        private DataReader serialReader;
         private DataWriter serialWriter;
-      //  private GattDeviceService service;
+        private CancellationTokenSource ReadCancellationTokenSource;
+
+        //  private GattDeviceService service;
 
         //   public IAsyncOperation<DevicePairingResult> ParingResult;
         public ObservableCollection<Btdevice> ResultCollection
@@ -67,18 +73,40 @@ namespace HomeAutomation
 
         private void Connect_btn_Click(object sender, RoutedEventArgs e)
         {
+            ReadCancellationTokenSource = new CancellationTokenSource();
+
             //connect();
             connect2();
+            
         }
 
 
 
+     public async void connect()
+        {
+            Btdevice btdevice = resultListView.SelectedItem as Btdevice;
 
+            var serialPort = await SerialDevice.FromIdAsync(btdevice.Id);
+
+            serialPort.ReadTimeout = TimeSpan.FromMilliseconds(1000);
+            serialPort.WriteTimeout = TimeSpan.FromMilliseconds(1000);
+            serialPort.BaudRate = 9600;
+            serialPort.Parity = SerialParity.None;
+            serialPort.StopBits = SerialStopBitCount.One;
+            serialPort.DataBits = 8;
+        }
 
    
+       
+        private  void rcvdText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // ...
 
 
+            // ...	
+        }
 
+      
 
 
 
@@ -378,15 +406,17 @@ namespace HomeAutomation
                     return;
                 }
 
+                
                 uint stringLength = chatReader.ReadUInt32();
-                uint actualStringLength = await chatReader.LoadAsync(stringLength);
+               uint actualStringLength = await chatReader.LoadAsync(stringLength);
+
                 if (actualStringLength != stringLength)
                 {
                     // The underlying socket was closed before we were able to read the whole data
                     return;
                 }
 
-                conversionList.Items.Add("Received: " + chatReader.ReadString(stringLength));
+                conversionList.Items.Add("Received: " + chatReader.ReadString(8));
 
                ReceiveStringLoop(chatReader);
             }
@@ -413,8 +443,9 @@ namespace HomeAutomation
             {
                 if (message_box.Text.Length != 0)
                 {
-                    //serialWriter.WriteUInt32((uint)message_box.Text.Length);
-                    serialWriter.WriteString(message_box.Text+"\n");
+                    uint inputelement = serialWriter.MeasureString(message_box.Text);
+                    serialWriter.WriteUInt32(inputelement);
+                    serialWriter.WriteString(message_box.Text);
 
                     conversionList.Items.Add("Sent: " + message_box.Text);
                     message_box.Text = "";
@@ -504,6 +535,7 @@ namespace HomeAutomation
 
             BtWatcherStop();
 
+            
             // socket assingment
           lock(this) { _socket = new StreamSocket(); } // for marking this as crtical section.
 
@@ -523,17 +555,43 @@ namespace HomeAutomation
                 DataReader serialReader = new DataReader(_socket.InputStream);
 
                 ResetUI();
-                ReceiveStringLoop(serialReader);
+
+
+
+
+
+                byte b;
+
+                while (true)
+                {
+                   await serialReader.LoadAsync(sizeof(uint));
+
+
+                    b = serialReader.ReadByte();
+                       conversionList.Items.Add("Sent: " +  b );
+                   
+                    conversionList.Items.Add("Sent: " + Convert.ToChar(b));
+
+                    rootPage.StatusBar("bytes read successfully!", barStatus.Warnning);
+
+                    
+                }
+
+
+
+
+
+
+                
+
+
+               //ReceiveStringLoop(serialReader);
             }
             catch(Exception ex)
             { rootPage.StatusBar("Error : "+ex.ToString(), barStatus.Error); }
         }
 
-
-
-
-
-
+        
     }
 
 
