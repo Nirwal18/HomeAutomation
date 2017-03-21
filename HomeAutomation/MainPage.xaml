@@ -8,6 +8,10 @@
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <local:ScenarioBindingConverter x:Key="ScenarioConverter"></local:ScenarioBindingConverter>
+    </Page.Resources>
+
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -45,9 +49,19 @@
                        RelativePanel.AlignLeftWithPanel="True">
                 <SplitView.Pane>
                     <RelativePanel Name="pane">
-                        <TextBlock Name="Home" Text="Home" Style="{StaticResource SubheaderTextBlockStyle}" Width="100px" Height="50px" Margin="10,0,0,0"/>
-                        <TextBlock Name="Seting" Text="Setting" Style="{StaticResource SubheaderTextBlockStyle}" Width="100px" Height="50px" Margin="10,50,0,0"/>
-                        <Button Name="page2_btn" Content="Page2" Click="page2_btn_Click"/>
+                        
+                        <ListBox x:Name="ScenarioControl" SelectionChanged="ScenarioControl_SelectionChanged"
+                 SelectionMode="Single" HorizontalAlignment="Left" Background="Transparent" BorderThickness="0"
+                 VerticalAlignment="Top"  Margin="0,10,0,0" >
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock FontSize="10" 
+                                        Text="{Binding Converter={StaticResource ScenarioConverter}}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                       
+                        
                     </RelativePanel>
                 </SplitView.Pane>
 

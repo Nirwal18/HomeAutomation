@@ -22,9 +22,18 @@ namespace HomeAutomation
     /// </summary>
     public sealed partial class Page2 : Page
     {
+        public static Page2 current;
+        public Page1 page1;         // for Accessing Page1 Resource
+
         public Page2()
         {
             this.InitializeComponent();
+            current = this;
         }
+
+
+
+        
+        
     }
 }

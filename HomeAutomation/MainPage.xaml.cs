@@ -40,6 +40,26 @@ namespace HomeAutomation
           //  throw new NotImplementedException();
         }
 
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            ScenarioControl.ItemsSource = scenarios;
+            if (Window.Current.Bounds.Width < 640)
+            {
+                ScenarioControl.SelectedIndex = -1;
+            }
+            else
+            {
+                ScenarioControl.SelectedIndex = 0;
+            }
+        }
+
+        public List<Scenario> Scenarios
+        {
+            get { return this.scenarios; }
+        }
+
+
+
 
         private void hamburger_menu_click(object sender, RoutedEventArgs e)
         {
@@ -88,12 +108,32 @@ namespace HomeAutomation
            // StatusBar("device Added Event tiggred", barStatus.Sucess);
 
         }
+
+        private void ScenarioControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // add page list for hamburger menu in scenario.cs file
+            ListBox scenarioListBox = sender as ListBox;
+            Scenario s = scenarioListBox.SelectedItem as Scenario;
+            if (s != null)
+            {
+                Frame_container.Navigate(s.ClassType);
+                if (Window.Current.Bounds.Width < 640)
+                {
+                    slider.IsPaneOpen = false;
+                }
+            }
+
+        }
     }
 
     /// <summary>
     /// To show Status bar warnning, sucess and Error state. Used in function StatusBar();
     /// </summary>
     public enum barStatus { Error, Warnning, Sucess, Normal };
+
+
+
+   
 
 }
 

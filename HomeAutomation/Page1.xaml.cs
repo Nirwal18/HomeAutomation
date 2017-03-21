@@ -45,6 +45,7 @@ namespace HomeAutomation
         private DataReader serialReader;
         private DataWriter serialWriter;
         private CancellationTokenSource ReadCancellationTokenSource;
+        private static Page1 current;
 
         //  private GattDeviceService service;
 
@@ -59,7 +60,8 @@ namespace HomeAutomation
         {
             this.InitializeComponent();
             ResultCollection = new ObservableCollection<Btdevice>();
-            // device = DeviceManager.GetDevice();
+            current = this;
+           
         }
 
         private  void Search_btn_Click(object sender, RoutedEventArgs e)
@@ -264,130 +266,13 @@ namespace HomeAutomation
             resultListView.IsEnabled = true;
         }
 
+
         private void send_btn_Click(object sender, RoutedEventArgs e)
         {
             SendMessage();
         }
-        /*
-        public async void connect()
-        {
+ 
 
-            // Make sure user has selected a device first
-            if (resultListView.SelectedItem != null)
-            {
-                rootPage.StatusBar("Connecting to remote device. Please wait...", barStatus.Sucess);
-            }
-            else
-            {
-                rootPage.StatusBar("Please select an item to connect to", barStatus.Error);
-                return;
-            }
-
-            Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
-
-            // Perform device access checks before trying to get the device.
-            // First, we check if consent has been explicitly denied by the user.
-            DeviceAccessStatus accessStatus = DeviceAccessInformation.CreateFromId(deviceInfoDisp.Id).CurrentStatus;
-            if (accessStatus == DeviceAccessStatus.DeniedByUser)
-            {
-                rootPage.StatusBar("This app does not have access to connect to the remote device (please grant access in Settings > Privacy > Other Devices", barStatus.Error);
-                return;
-            }
-
-            // If not, try to get the Bluetooth device
-            try
-            {
-                bluetoothDevice = await BluetoothDevice.FromIdAsync(deviceInfoDisp.Id);
-            }
-            catch (Exception ex)
-            {
-                rootPage.StatusBar(ex.Message, barStatus.Error);
-                return;
-            }
-
-            // If we were unable to get a valid Bluetooth device object,
-            // it's most likely because the user has specified that all unpaired devices
-            // should not be interacted with.
-            if (bluetoothDevice == null)
-            {
-                rootPage.StatusBar("Bluetooth Device returned null. Access Status = " + accessStatus.ToString(), barStatus.Error);
-            }
-
-            // This should return a list of uncached Bluetooth services (so if the server was not active when paired, it will still be detected by this call
-            var rfcommServices = await bluetoothDevice.GetRfcommServicesAsync(BluetoothCacheMode.Uncached);
-
-            if (rfcommServices.Services.Count > 0)
-            {
-                chatService = rfcommServices.Services[0];
-            }
-            else
-            {
-                rootPage.StatusBar(
-                   "Could not discover the chat service on the remote device",
-                   barStatus.Error);
-                return;
-            }
-
-            // Do various checks of the SDP record to make sure you are talking to a device that actually supports the Bluetooth Rfcomm Chat Service
-            var attributes = await chatService.GetSdpRawAttributesAsync();
-            if (!attributes.ContainsKey(Constants.SdpServiceNameAttributeId))
-            {
-                rootPage.StatusBar(
-                    "The Chat service is not advertising the Service Name attribute (attribute id=0x100). " +
-                    "Please verify that you are running the BluetoothRfcommChat server.",
-                    barStatus.Error);
-                Search_btn.IsEnabled = true;
-                return;
-            }
-
-            var attributeReader = DataReader.FromBuffer(attributes[Constants.SdpServiceNameAttributeId]);
-            var attributeType = attributeReader.ReadByte();
-            if (attributeType != Constants.SdpServiceNameAttributeType)
-            {
-                rootPage.StatusBar(
-                    "The Chat service is using an unexpected format for the Service Name attribute. " +
-                    "Please verify that you are running the BluetoothRfcommChat server.",
-                    barStatus.Error);
-                Search_btn.IsEnabled = true;
-                return;
-            }
-
-            var serviceNameLength = attributeReader.ReadByte();
-
-            // The Service Name attribute requires UTF-8 encoding.
-            attributeReader.UnicodeEncoding = UnicodeEncoding.Utf8;
-
-            deviceWatcher.Stop();
-
-            lock (this)
-            {
-                chatSocket = new StreamSocket();
-            }
-            try
-            {
-                await chatSocket.ConnectAsync(chatService.ConnectionHostName, chatService.ConnectionServiceName);
-
-                SetChatUI(attributeReader.ReadString(serviceNameLength), bluetoothDevice.Name);
-                chatWriter = new DataWriter(chatSocket.OutputStream);
-
-                DataReader chatReader = new DataReader(chatSocket.InputStream);
-                ResetUI();
-              //  ReceiveStringLoop(chatReader);
-            }
-            catch (Exception ex)
-            {
-                switch ((uint)ex.HResult)
-                {
-                    case (0x80070490): // ERROR_ELEMENT_NOT_FOUND
-                        rootPage.StatusBar("Please verify that you are running the BluetoothRfcommChat server.", barStatus.Error);
-                        Search_btn.IsEnabled = true;
-                        break;
-                    default:
-                        throw;
-                }
-            }
-        }
-        */
         private void SetChatUI(string v, string name)
         {
             send_btn.IsEnabled = false;
@@ -551,8 +436,8 @@ namespace HomeAutomation
                 SetChatUI(chatService.ServiceId.ToString(), btDevice.Name);
 
                 // reader and writer assingment.
-                 serialWriter = new DataWriter(_socket.OutputStream);
-                DataReader serialReader = new DataReader(_socket.InputStream);
+                serialWriter = new DataWriter(_socket.OutputStream);
+                serialReader = new DataReader(_socket.InputStream);
 
                 ResetUI();
 
@@ -560,17 +445,18 @@ namespace HomeAutomation
 
 
 
-                byte b;
-
+                byte b;//size of buffer protocol
+                string result;
                 while (true)
                 {
                    await serialReader.LoadAsync(sizeof(uint));
 
 
                     b = serialReader.ReadByte();
-                       conversionList.Items.Add("Sent: " +  b );
+                    result=serialReader.ReadString(Convert.ToUInt32(b));
+                    conversionList.Items.Add("Sent: " +  b );
                    
-                    conversionList.Items.Add("Sent: " + Convert.ToChar(b));
+                    conversionList.Items.Add("Sent: " + result);
 
                     rootPage.StatusBar("bytes read successfully!", barStatus.Warnning);
 
@@ -590,6 +476,51 @@ namespace HomeAutomation
             catch(Exception ex)
             { rootPage.StatusBar("Error : "+ex.ToString(), barStatus.Error); }
         }
+
+        public void statusRecieved(int n)
+        {
+            if(serialReader== null)
+            {
+                rootPage.StatusBar("serial reader object null on ststusRecieved()", barStatus.Error);
+                return;
+            }
+            for (int i = 0; i <= n; i++) 
+            {
+                if (serialReader.ReadByte() == 1)
+                {
+                    
+                }
+                else
+                {
+
+                }
+
+            }
+
+        }
+
+
+        public async void Send_cmd(string str)
+        {
+            try
+            {
+                int inputelement = str.Length;
+                serialWriter.WriteInt32(inputelement);
+                serialWriter.WriteString(str);
+                
+                await serialWriter.StoreAsync();      
+            }
+            catch (Exception ex) when ((uint)ex.HResult == 0x80072745)
+            {
+                // The remote device has disconnected the connection
+                rootPage.StatusBar("Remote side disconnect: " + ex.HResult.ToString() + " - " + ex.Message,
+                    barStatus.Warnning);
+            }
+                        
+        }
+
+
+
 
         
     }
