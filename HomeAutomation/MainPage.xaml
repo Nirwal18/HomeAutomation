@@ -55,7 +55,7 @@
                  VerticalAlignment="Top"  Margin="0,10,0,0" >
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock FontSize="10" 
+                                    <TextBlock FontSize="30" 
                                         Text="{Binding Converter={StaticResource ScenarioConverter}}"/>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>

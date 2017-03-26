@@ -7,6 +7,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Microsoft.Toolkit.Uwp.UI;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
@@ -36,16 +37,15 @@ namespace HomeAutomation
     public sealed partial class Page1 : Page
     {
         private MainPage rootPage = MainPage.current;
-        private BluetoothDevice bluetoothDevice = null;
-        private SerialDevice serialPort = null;
+               
         private DeviceWatcher deviceWatcher = null;
         private RfcommDeviceService chatService = null;
        
         private StreamSocket _socket;
         private DataReader serialReader;
         private DataWriter serialWriter;
-        private CancellationTokenSource ReadCancellationTokenSource;
-        private static Page1 current;
+        
+        public static Page1 current;
 
         //  private GattDeviceService service;
 
@@ -74,12 +74,8 @@ namespace HomeAutomation
 
 
         private void Connect_btn_Click(object sender, RoutedEventArgs e)
-        {
-            ReadCancellationTokenSource = new CancellationTokenSource();
-
-            //connect();
-            connect2();
-            
+        {        
+            connect2(); 
         }
 
 
@@ -102,10 +98,7 @@ namespace HomeAutomation
        
         private  void rcvdText_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // ...
-
-
-            // ...	
+            // not implemented.
         }
 
       
@@ -292,8 +285,8 @@ namespace HomeAutomation
                 }
 
                 
-                uint stringLength = chatReader.ReadUInt32();
-               uint actualStringLength = await chatReader.LoadAsync(stringLength);
+                uint stringLength = serialReader.ReadUInt32();
+               uint actualStringLength = await serialReader.LoadAsync(stringLength);
 
                 if (actualStringLength != stringLength)
                 {
@@ -301,9 +294,9 @@ namespace HomeAutomation
                     return;
                 }
 
-                conversionList.Items.Add("Received: " + chatReader.ReadString(8));
+                conversionList.Items.Add("Received: " + serialReader.ReadString(8));
 
-               ReceiveStringLoop(chatReader);
+               ReceiveStringLoop(serialReader);
             }
             catch (Exception ex)
             {
@@ -445,7 +438,7 @@ namespace HomeAutomation
 
 
 
-                byte b;//size of buffer protocol
+               /* byte b;//size of buffer protocol
                 string result;
                 while (true)
                 {
@@ -461,7 +454,7 @@ namespace HomeAutomation
                     rootPage.StatusBar("bytes read successfully!", barStatus.Warnning);
 
                     
-                }
+                }*/
 
 
 
@@ -477,50 +470,37 @@ namespace HomeAutomation
             { rootPage.StatusBar("Error : "+ex.ToString(), barStatus.Error); }
         }
 
-        public void statusRecieved(int n)
+
+        // under development function
+        public string StatusRecieved()
         {
-            if(serialReader== null)
-            {
-                rootPage.StatusBar("serial reader object null on ststusRecieved()", barStatus.Error);
-                return;
-            }
-            for (int i = 0; i <= n; i++) 
-            {
-                if (serialReader.ReadByte() == 1)
-                {
-                    
-                }
-                else
-                {
+            uint size;
+            Task t1 = new Task(async () => {
+                size = await serialReader.LoadAsync(sizeof(uint));
+            });
 
-                }
+            t1.Start();
+            t1.Wait();
 
-            }
+            byte b = serialReader.ReadByte();
+            uint c = Convert.ToUInt32(b);
+            return serialReader.ReadString(c);
+            
 
         }
 
 
-        public async void Send_cmd(string str)
+        public async void Send_cmd(int mode, int pin,string cmd)
         {
-            try
-            {
-                int inputelement = str.Length;
-                serialWriter.WriteInt32(inputelement);
-                serialWriter.WriteString(str);
-                
-                await serialWriter.StoreAsync();      
-            }
-            catch (Exception ex) when ((uint)ex.HResult == 0x80072745)
-            {
-                // The remote device has disconnected the connection
-                rootPage.StatusBar("Remote side disconnect: " + ex.HResult.ToString() + " - " + ex.Message,
-                    barStatus.Warnning);
-            }
-                        
+            serialWriter.WriteInt32(mode);
+            serialWriter.WriteInt32(pin);
+            serialWriter.WriteString(cmd);
+            await serialWriter.StoreAsync();
+            
+                      
         }
 
-
-
+      
 
         
     }

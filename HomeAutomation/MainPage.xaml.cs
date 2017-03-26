@@ -42,7 +42,9 @@ namespace HomeAutomation
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+            // add page list for hamburger menu in scenario.cs file
             ScenarioControl.ItemsSource = scenarios;
+
             if (Window.Current.Bounds.Width < 640)
             {
                 ScenarioControl.SelectedIndex = -1;
@@ -53,6 +55,12 @@ namespace HomeAutomation
             }
         }
 
+
+
+
+        /// <summary>
+        /// for geeting list of scenario menu item in Main page. And accessable.
+        /// </summary>
         public List<Scenario> Scenarios
         {
             get { return this.scenarios; }
@@ -68,9 +76,7 @@ namespace HomeAutomation
         }
 
 
-        
-
-       
+           
 
 
         /// <summary>
@@ -100,23 +106,23 @@ namespace HomeAutomation
         }
 
 
+        
 
-
-        private void page2_btn_Click(object sender, RoutedEventArgs e)
-        {
-            Frame_container.Navigate(typeof(Page2));
-           // StatusBar("device Added Event tiggred", barStatus.Sucess);
-
-        }
-
+        /// <summary>
+        /// This event is tiggered when you click on Hambarger menu list item.
+        /// It update header text also.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ScenarioControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // add page list for hamburger menu in scenario.cs file
+            
             ListBox scenarioListBox = sender as ListBox;
             Scenario s = scenarioListBox.SelectedItem as Scenario;
             if (s != null)
             {
                 Frame_container.Navigate(s.ClassType);
+                Header_text.Text = s.Title;
                 if (Window.Current.Bounds.Width < 640)
                 {
                     slider.IsPaneOpen = false;

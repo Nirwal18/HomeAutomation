@@ -23,7 +23,8 @@ namespace HomeAutomation
     public sealed partial class Page2 : Page
     {
         public static Page2 current;
-        public Page1 page1;         // for Accessing Page1 Resource
+        private MainPage rootPage = MainPage.current;
+        public Page1 page1 = Page1.current;         // for Accessing Page1 Resource
 
         public Page2()
         {
@@ -31,9 +32,18 @@ namespace HomeAutomation
             current = this;
         }
 
-
-
-        
-        
+        private void ToggleSwitch1_Toggled(object sender, RoutedEventArgs e)
+        {
+            if(this.toggleSwicth1.IsOn)
+            {
+                page1.Send_cmd(1,3,"ON;");
+            }
+            else
+            {
+                page1.Send_cmd(1,3,"OFF;");
+            }
+           
+            
+        }
     }
 }

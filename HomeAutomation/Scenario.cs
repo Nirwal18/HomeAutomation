@@ -24,9 +24,9 @@ namespace HomeAutomation
         // add the line for list box for navigation in hamburger menu
         List<Scenario> scenarios = new List<Scenario> {
 
-            new Scenario(){Title="page1",ClassType=typeof(Page1)},
-            new Scenario() { Title = "page1",ClassType = typeof(Page2)},
-            new Scenario() { Title = "page1",ClassType = typeof(Page3)}
+            new Scenario(){Title="Connect and Pair",ClassType=typeof(Page1)},
+            new Scenario() { Title = "Control",ClassType = typeof(Page2)},
+            new Scenario() { Title ="Setting",ClassType = typeof(Page3)}
 
         };
     }
