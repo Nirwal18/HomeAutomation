@@ -500,9 +500,13 @@ namespace HomeAutomation
                       
         }
 
-      
-
-        
+        private void disconnect_btn_Click(object sender, RoutedEventArgs e)
+        {
+            if(_socket != null) _socket.Dispose(); 
+            if (serialReader != null) serialReader.Dispose();
+            if (serialWriter != null) serialWriter.Dispose();
+            rootPage.StatusBar("Socket closed by User",barStatus.Warnning);
+        }
     }
 
 
