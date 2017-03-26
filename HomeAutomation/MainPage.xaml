@@ -23,7 +23,7 @@
         
             <StackPanel Name="Header" Orientation="Horizontal" Background="{ThemeResource AppBarBackgroundThemeBrush}">
             <Border Background="{ThemeResource AppBarBorderThemeBrush }" Grid.Row="0" >
-                <ToggleButton Name="hamburgerMenu_btn" VerticalAlignment="Stretch" Width="40" Margin="0,0,0,2" Click="hamburger_menu_click" IsChecked="True" >
+                <ToggleButton Name="hamburgerMenu_btn" VerticalAlignment="Stretch" Width="40" Margin="0,0,0,2" Click="Hamburger_menu_click" IsChecked="True" >
                     <ToggleButton.Content>
                         <FontIcon x:Name="Hamburger" FontFamily="Segoe MDL2 Assets" Glyph="&#xE700;" Margin="0,10,0,0" Height="20" VerticalAlignment="Top"/>
                     </ToggleButton.Content>

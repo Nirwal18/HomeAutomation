@@ -69,7 +69,7 @@ namespace HomeAutomation
 
 
 
-        private void hamburger_menu_click(object sender, RoutedEventArgs e)
+        private void Hamburger_menu_click(object sender, RoutedEventArgs e)
         {
             slider.IsPaneOpen = !slider.IsPaneOpen;
            
@@ -82,21 +82,21 @@ namespace HomeAutomation
         /// <summary>
         /// it is used to set property to bar.
         /// this function is used to set text and color on Status bar. Example : 
-        /// status =barStatus.Error    red, 
-        /// status =barStatus.warning  Yellow, 
-        /// status =barStatus.sucess   Green 
+        /// status =BarStatus.Error    red, 
+        /// status =BarStatus.warning  Yellow, 
+        /// status =BarStatus.sucess   Green 
         /// </summary>
-        public void StatusBar(string message,barStatus status)
+        public void StatusBar(string message,BarStatus status)
         {
             switch (status)
             {
-                case barStatus.Error:
+                case BarStatus.Error:
                     StatusBoder.Background = new SolidColorBrush(Windows.UI.Colors.DarkRed);
                     break;
-                case barStatus.Sucess:
+                case BarStatus.Sucess:
                     StatusBoder.Background = new SolidColorBrush(Windows.UI.Colors.Green);
                     break;
-                case barStatus.Warnning:
+                case BarStatus.Warnning:
                     StatusBoder.Background = new SolidColorBrush(Windows.UI.Colors.Yellow);
                     break;
             }
@@ -135,7 +135,7 @@ namespace HomeAutomation
     /// <summary>
     /// To show Status bar warnning, sucess and Error state. Used in function StatusBar();
     /// </summary>
-    public enum barStatus { Error, Warnning, Sucess, Normal };
+    public enum BarStatus { Error, Warnning, Sucess, Normal };
 
 
 

@@ -68,19 +68,19 @@ namespace HomeAutomation
         {
             Search_btn.IsEnabled = false;
             ResultCollection.Clear();
-            rootPage.StatusBar("Searching for bluetooth device", barStatus.Sucess);
+            rootPage.StatusBar("Searching for bluetooth device", BarStatus.Sucess);
             BtWatcherStart();     
         }
 
 
         private void Connect_btn_Click(object sender, RoutedEventArgs e)
         {        
-            connect2(); 
+            Connect2(); 
         }
 
 
 
-     public async void connect()
+     public async void Connect()
         {
             Btdevice btdevice = resultListView.SelectedItem as Btdevice;
 
@@ -96,12 +96,7 @@ namespace HomeAutomation
 
    
        
-        private  void rcvdText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            // not implemented.
-        }
-
-      
+        
 
 
 
@@ -140,7 +135,7 @@ namespace HomeAutomation
             }
             // update ui and enable btn
             Search_btn.IsEnabled = true;
-            rootPage.StatusBar("Watcher Stoped", barStatus.Warnning);
+            rootPage.StatusBar("Watcher Stoped", BarStatus.Warnning);
         }
 
 
@@ -150,7 +145,7 @@ namespace HomeAutomation
             await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
 
                 ResultCollection.Add(new Btdevice(deviceInfo));
-                rootPage.StatusBar("Searching for Bluetooth devices...", barStatus.Sucess);
+                rootPage.StatusBar("Searching for Bluetooth devices...", BarStatus.Sucess);
             });
 
            
@@ -179,7 +174,7 @@ namespace HomeAutomation
             // for updating UI from non UI thread.
             await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
 
-                rootPage.StatusBar(String.Format("Enumeration completed. {0} device found. ", ResultCollection.Count), barStatus.Normal);
+                rootPage.StatusBar(String.Format("Enumeration completed. {0} device found. ", ResultCollection.Count), BarStatus.Normal);
             });
         }
 
@@ -199,7 +194,7 @@ namespace HomeAutomation
 
                 rootPage.StatusBar(
                         String.Format("{0} devices found.", ResultCollection.Count),
-                        barStatus.Sucess);
+                        BarStatus.Sucess);
 
             });
            
@@ -210,7 +205,7 @@ namespace HomeAutomation
             // for updating UI from non UI thread.
             await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
                 rootPage.StatusBar(String.Format("{0} device Found, Watcher {1}", ResultCollection.Count, DeviceWatcherStatus.Aborted == sender.Status ? "Aborted" : "Stopped"),
-                    barStatus.Error);
+                    BarStatus.Error);
                 ResultCollection.Clear();
             });
           
@@ -219,21 +214,21 @@ namespace HomeAutomation
        
         private async void BtPair()
         {                       
-            rootPage.StatusBar("Paring Started Please Wait...", barStatus.Warnning);
+            rootPage.StatusBar("Paring Started Please Wait...", BarStatus.Warnning);
 
             Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
             DevicePairingResult dpr = await deviceInfoDisp.DeviceInformation.Pairing.PairAsync();
 
-            rootPage.StatusBar("Paring Result" + dpr.Status.ToString(), dpr.Status == DevicePairingResultStatus.Paired ? barStatus.Sucess : barStatus.Error);
+            rootPage.StatusBar("Paring Result" + dpr.Status.ToString(), dpr.Status == DevicePairingResultStatus.Paired ? BarStatus.Sucess : BarStatus.Error);
         }
         private async void BtUnpair()
         {
-            rootPage.StatusBar("Paring Started Please Wait...", barStatus.Warnning);
+            rootPage.StatusBar("Paring Started Please Wait...", BarStatus.Warnning);
 
             Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
             DeviceUnpairingResult dupr = await deviceInfoDisp.DeviceInformation.Pairing.UnpairAsync();
 
-            rootPage.StatusBar("Unparing Result" + dupr.Status.ToString(), dupr.Status == DeviceUnpairingResultStatus.Unpaired ? barStatus.Sucess : barStatus.Error);
+            rootPage.StatusBar("Unparing Result" + dupr.Status.ToString(), dupr.Status == DeviceUnpairingResultStatus.Unpaired ? BarStatus.Sucess : BarStatus.Error);
                         
         }
 
@@ -244,7 +239,7 @@ namespace HomeAutomation
             Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
             if (deviceInfoDisp == null)
             {
-                rootPage.StatusBar("Please Select the device", barStatus.Error);
+                rootPage.StatusBar("Please Select the device", BarStatus.Error);
                 resultListView.IsEnabled = true;
                 return;
             }
@@ -260,7 +255,7 @@ namespace HomeAutomation
         }
 
 
-        private void send_btn_Click(object sender, RoutedEventArgs e)
+        private void Send_btn_Click(object sender, RoutedEventArgs e)
         {
             SendMessage();
         }
@@ -336,7 +331,7 @@ namespace HomeAutomation
             {
                 // The remote device has disconnected the connection
                 rootPage.StatusBar("Remote side disconnect: " + ex.HResult.ToString() + " - " + ex.Message,
-                    barStatus.Warnning);
+                    BarStatus.Warnning);
             }
         }
 
@@ -364,7 +359,7 @@ namespace HomeAutomation
                 }
             }
 
-            rootPage.StatusBar(disconnectReason, barStatus.Warnning);
+            rootPage.StatusBar(disconnectReason, BarStatus.Warnning);
             ResetUI();
         }
 
@@ -378,12 +373,12 @@ namespace HomeAutomation
         }
 
 
-        public async void connect2()
+        public async void Connect2()
         {
            // checking if device is selected or not.
             if (resultListView.SelectedItem == null)
             {
-                rootPage.StatusBar("please selet an item to connect", barStatus.Error);
+                rootPage.StatusBar("please selet an item to connect", BarStatus.Error);
                 return;
             }
             // selecting bluetooth device
@@ -395,14 +390,14 @@ namespace HomeAutomation
             // checking device initiallized or not.
             if (btDevice == null)
             {
-                rootPage.StatusBar("Connection device error", barStatus.Error);
+                rootPage.StatusBar("Connection device error", BarStatus.Error);
                 return;
             }
             // getting service result from device regarding to serial port.
             var _rfcomService = await btDevice.GetRfcommServicesForIdAsync(RfcommServiceId.SerialPort,BluetoothCacheMode.Uncached);
                 if (_rfcomService.Services.Count == 0)
                 {
-                    rootPage.StatusBar("Serial service not found on device.", barStatus.Error);
+                    rootPage.StatusBar("Serial service not found on device.", BarStatus.Error);
                     return;
                 }
                 
@@ -423,7 +418,7 @@ namespace HomeAutomation
             {
                 // socket initializesd
                 await _socket.ConnectAsync(chatService.ConnectionHostName, chatService.ConnectionServiceName, SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
-                rootPage.StatusBar("connection to device done sucessfully", barStatus.Sucess);
+                rootPage.StatusBar("connection to device done sucessfully", BarStatus.Sucess);
 
 
                 SetChatUI(chatService.ServiceId.ToString(), btDevice.Name);
@@ -451,7 +446,7 @@ namespace HomeAutomation
                    
                     conversionList.Items.Add("Sent: " + result);
 
-                    rootPage.StatusBar("bytes read successfully!", barStatus.Warnning);
+                    rootPage.StatusBar("bytes read successfully!", BarStatus.Warnning);
 
                     
                 }*/
@@ -467,7 +462,7 @@ namespace HomeAutomation
                //ReceiveStringLoop(serialReader);
             }
             catch(Exception ex)
-            { rootPage.StatusBar("Error : "+ex.ToString(), barStatus.Error); }
+            { rootPage.StatusBar("Error : "+ex.ToString(), BarStatus.Error); }
         }
 
 
@@ -500,12 +495,12 @@ namespace HomeAutomation
                       
         }
 
-        private void disconnect_btn_Click(object sender, RoutedEventArgs e)
+        private void Disconnect_btn_Click(object sender, RoutedEventArgs e)
         {
             if(_socket != null) _socket.Dispose(); 
             if (serialReader != null) serialReader.Dispose();
             if (serialWriter != null) serialWriter.Dispose();
-            rootPage.StatusBar("Socket closed by User",barStatus.Warnning);
+            rootPage.StatusBar("Socket closed by User",BarStatus.Warnning);
         }
     }
 
