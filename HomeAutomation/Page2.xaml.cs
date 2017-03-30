@@ -12,6 +12,8 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using HomeAutomation.Model; //for accessing class in model folder
+using HomeAutomation.EventHandler; //for accessing class in EventHandler folder
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -30,6 +32,10 @@ namespace HomeAutomation
         {
             this.InitializeComponent();
             current = this;
+
+
+           
+            
         }
 
         private void ToggleSwitch1_Toggled(object sender, RoutedEventArgs e)

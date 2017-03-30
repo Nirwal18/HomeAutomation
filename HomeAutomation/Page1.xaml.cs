@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using HomeAutomation.Model;
+using HomeAutomation.EventHandler;
 using System.Diagnostics;
 using Windows.Devices.AllJoyn;
 using Windows.Devices.Bluetooth;
@@ -61,7 +62,8 @@ namespace HomeAutomation
             this.InitializeComponent();
             ResultCollection = new ObservableCollection<Btdevice>();
             current = this;
-           
+
+            DeviceEventHandler.CreateNewDeviceEventHandler();
         }
 
         private  void Search_btn_Click(object sender, RoutedEventArgs e)
@@ -69,7 +71,8 @@ namespace HomeAutomation
             Search_btn.IsEnabled = false;
             ResultCollection.Clear();
             rootPage.StatusBar("Searching for bluetooth device", BarStatus.Sucess);
-            BtWatcherStart();     
+            //BtWatcherStart();     
+            DeviceEventHandler.Current.StartDeviceWatcher();
         }
 
 
@@ -384,6 +387,8 @@ namespace HomeAutomation
             // selecting bluetooth device
             Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
 
+            await DeviceEventHandler.Current.ConnectAsyncFromId(btSelectedDevice.Id);
+            return;
             //initialize bluetooth device
             var btDevice = await BluetoothDevice.FromIdAsync(btSelectedDevice.Id);
 
@@ -487,10 +492,14 @@ namespace HomeAutomation
 
         public async void Send_cmd(int mode, int pin,string cmd)
         {
-            serialWriter.WriteInt32(mode);
-            serialWriter.WriteInt32(pin);
-            serialWriter.WriteString(cmd);
-            await serialWriter.StoreAsync();
+            DeviceEventHandler.Current.SerialWriter.WriteInt32(mode);
+            DeviceEventHandler.Current.SerialWriter.WriteInt32(pin);
+            DeviceEventHandler.Current.SerialWriter.WriteString(cmd);
+            await DeviceEventHandler.Current.SerialWriter.StoreAsync();
+            //serialWriter.WriteInt32(mode);
+            //serialWriter.WriteInt32(pin);
+            //serialWriter.WriteString(cmd);
+            //await serialWriter.StoreAsync();
             
                       
         }

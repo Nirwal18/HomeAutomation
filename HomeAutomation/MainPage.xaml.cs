@@ -99,6 +99,9 @@ namespace HomeAutomation
                 case BarStatus.Warnning:
                     StatusBoder.Background = new SolidColorBrush(Windows.UI.Colors.Yellow);
                     break;
+                case BarStatus.Normal:
+                    StatusBoder.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(230,231,232,6));
+                    break;
             }
 
             StatusBar_Text.Text = message;
@@ -116,7 +119,7 @@ namespace HomeAutomation
         /// <param name="e"></param>
         private void ScenarioControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
+            StatusBar(String.Empty,BarStatus.Normal);
             ListBox scenarioListBox = sender as ListBox;
             Scenario s = scenarioListBox.SelectedItem as Scenario;
             if (s != null)
