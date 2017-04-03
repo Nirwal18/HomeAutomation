@@ -48,7 +48,7 @@ namespace HomeAutomation.Model
                 return deviceInfo.Id;
             }
         }
-
+ 
 
         public bool IsPared
         {

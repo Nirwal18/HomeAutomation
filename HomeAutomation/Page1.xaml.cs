@@ -82,7 +82,7 @@ namespace HomeAutomation
         }
 
 
-
+// serial port connect optional not woking with bluetooth.
      public async void Connect()
         {
             Btdevice btdevice = resultListView.SelectedItem as Btdevice;
@@ -102,117 +102,6 @@ namespace HomeAutomation
         
 
 
-
-        public void BtWatcherStart()
-        {
-            // device requesting property
-            string[] requestedProperties = new string[] { "System.Devices.Aep.DeviceAddress", "System.Devices.Aep.IsConnected" };
-
-            // watcher created for bluetooth device discovery
-            deviceWatcher=DeviceInformation.CreateWatcher("(System.Devices.Aep.ProtocolId:=\"{e0cbf06c-cd8b-4647-bb8a-263b43f0f974}\")",
-                                                            requestedProperties,
-                                                            DeviceInformationKind.AssociationEndpoint);
-            // watcher event call initiallize
-            deviceWatcher.Added += DeviceWatcher_Added;
-            deviceWatcher.Updated += DeviceWatcher_Updated;
-            deviceWatcher.EnumerationCompleted += DeviceWatcher_EnumerationCompleted;
-            deviceWatcher.Removed += DeviceWatcher_Removed;
-            deviceWatcher.Stopped += DeviceWatcher_Stopped;
-            // now watcher start working
-            deviceWatcher.Start();
-
-        }
-
-        public void BtWatcherStop()
-        {
-            deviceWatcher.Added -= DeviceWatcher_Added;
-            deviceWatcher.Updated -= DeviceWatcher_Updated;
-            deviceWatcher.EnumerationCompleted -= DeviceWatcher_EnumerationCompleted;
-            deviceWatcher.Removed -= DeviceWatcher_Removed;
-            deviceWatcher.Stopped -= DeviceWatcher_Stopped;
-
-            if (DeviceWatcherStatus.Started == deviceWatcher.Status ||
-                DeviceWatcherStatus.EnumerationCompleted == deviceWatcher.Status)
-            {
-                deviceWatcher.Stop();
-            }
-            // update ui and enable btn
-            Search_btn.IsEnabled = true;
-            rootPage.StatusBar("Watcher Stoped", BarStatus.Warnning);
-        }
-
-
-        private async void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation deviceInfo)
-        {
-            // for updating UI from non UI thread.
-            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
-
-                ResultCollection.Add(new Btdevice(deviceInfo));
-                rootPage.StatusBar("Searching for Bluetooth devices...", BarStatus.Sucess);
-            });
-
-           
-        }
-
-
-        private async void DeviceWatcher_Updated(DeviceWatcher sender, DeviceInformationUpdate deviceUpdate)
-        {
-            // for updating UI from non UI thread.
-            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
-
-                foreach (Btdevice disp in ResultCollection)
-                {
-                    if(disp.Id == deviceUpdate.Id)
-                    {
-                        disp.Update(deviceUpdate);
-                        break;
-                    }
-                }
-            });
-           
-        }
-
-        private async void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, object args)
-        {
-            // for updating UI from non UI thread.
-            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
-
-                rootPage.StatusBar(String.Format("Enumeration completed. {0} device found. ", ResultCollection.Count), BarStatus.Normal);
-            });
-        }
-
-        private async void DeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate deviceUpdate)
-        {
-            // for updating UI from non UI thread.
-            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
-
-                foreach (Btdevice disp in ResultCollection)
-                {
-                    if (disp.Id == deviceUpdate.Id) 
-                    {
-                        ResultCollection.Remove(disp);
-                        break;
-                    }
-                }
-
-                rootPage.StatusBar(
-                        String.Format("{0} devices found.", ResultCollection.Count),
-                        BarStatus.Sucess);
-
-            });
-           
-        }
-
-        private async void DeviceWatcher_Stopped(DeviceWatcher sender, object args)
-        {
-            // for updating UI from non UI thread.
-            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () => {
-                rootPage.StatusBar(String.Format("{0} device Found, Watcher {1}", ResultCollection.Count, DeviceWatcherStatus.Aborted == sender.Status ? "Aborted" : "Stopped"),
-                    BarStatus.Error);
-                ResultCollection.Clear();
-            });
-          
-        }
 
        
         private async void BtPair()
@@ -490,26 +379,13 @@ namespace HomeAutomation
         }
 
 
-        public async void Send_cmd(int mode, int pin,string cmd)
-        {
-            DeviceEventHandler.Current.SerialWriter.WriteInt32(mode);
-            DeviceEventHandler.Current.SerialWriter.WriteInt32(pin);
-            DeviceEventHandler.Current.SerialWriter.WriteString(cmd);
-            await DeviceEventHandler.Current.SerialWriter.StoreAsync();
-            //serialWriter.WriteInt32(mode);
-            //serialWriter.WriteInt32(pin);
-            //serialWriter.WriteString(cmd);
-            //await serialWriter.StoreAsync();
-            
-                      
-        }
+
 
         private void Disconnect_btn_Click(object sender, RoutedEventArgs e)
         {
-            if(_socket != null) _socket.Dispose(); 
-            if (serialReader != null) serialReader.Dispose();
-            if (serialWriter != null) serialWriter.Dispose();
-            rootPage.StatusBar("Socket closed by User",BarStatus.Warnning);
+            DeviceEventHandler.Current.CloseDevice();
+            rootPage.StatusBar("Disconnect SucessFull",BarStatus.Normal);
+            Search_btn.IsEnabled = true;
         }
     }
 

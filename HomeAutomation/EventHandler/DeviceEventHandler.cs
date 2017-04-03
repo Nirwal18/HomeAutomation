@@ -32,7 +32,7 @@ namespace HomeAutomation.EventHandler
         /// </summary>
         private static Object singletonCreationLock = new object();
 
-        private String deviceSelector;
+        private String deviceId;
         private DeviceWatcher deviceWatcher;
 
         private DeviceInformation deviceInformation;
@@ -46,6 +46,9 @@ namespace HomeAutomation.EventHandler
         private TypedEventHandler<DeviceEventHandler, DeviceInformation> deviceConnectedCallback;
 
         private TypedEventHandler<DeviceWatcher, DeviceInformation> deviceAddedEventHandler;
+        private TypedEventHandler<DeviceWatcher, DeviceInformationUpdate> deviceUpdateEventHandler;
+        private TypedEventHandler<DeviceWatcher, Object> deviceEmulationCompleteEventHandler;
+        private TypedEventHandler<DeviceWatcher, Object> deviceStoppedEventHandler;
         private TypedEventHandler<DeviceWatcher, DeviceInformationUpdate> deviceRemovedEventHandler;
         private TypedEventHandler<DeviceAccessInformation, DeviceAccessChangedEventArgs> deviceAccessEventHandler;
 
@@ -170,98 +173,10 @@ namespace HomeAutomation.EventHandler
             }
         }
 
-        /// <summary>
-        /// DeviceSelector AQS used to find this device
-        /// </summary>
-        public String DeviceSelector
-        {
-            get
-            {
-                return deviceSelector;
-            }
-        }
-
-        /// <summary>
-        /// True if DeviceEventHandler will attempt to reconnect to the device once it is plugged into the computer again
-        /// </summary>
-        public Boolean IsEnabledAutoReconnect
-        {
-
-            get
-            {
-                return isEnabledAutoReconnect;
-            }
-            set
-            {
-                isEnabledAutoReconnect = value;
-            }
-        }
-
        
 
-        public async Task<Boolean> OpenDeviceAsync(DeviceInformation deviceInfo, String deviceSelector)
-        {
-            bluetoothDevice = await BluetoothDevice.FromIdAsync(deviceInfo.Id);
-            Boolean sucessfullyOpenedDevice = false;
-            BarStatus notificationStatus;
-            String notificationMessage = null;
 
-            if (bluetoothDevice != null)
-            {
-                sucessfullyOpenedDevice = true;
-
-                deviceInformation = deviceInfo;
-                this.deviceSelector = deviceSelector;
-
-                notificationStatus = BarStatus.Sucess;
-                notificationMessage = "Device " + deviceInformation.Id + " opened";
-
-                if (deviceConnectedCallback != null)
-                {
-                    deviceConnectedCallback(this, deviceInformation);
-                }
-
-                if (appSuspendEventHandler == null || appResumeEventHandler == null)
-                {
-                    RegisterForAppEvents();
-                }
-
-                if (deviceAccessEventHandler == null)
-                {
-                    RegisterForDeviceAccessStatusChange();
-                }
-
-                if (deviceWatcher == null)
-                {
-                    deviceWatcher = DeviceInformation.CreateWatcher(deviceSelector);
-                    RegisterForDeviceWatcherEvents();
-                }
-
-                if (!watcherStarted)
-                {
-                    StartDeviceWatcher();
-                }
-
-            }
-            else
-            {
-                sucessfullyOpenedDevice = false;
-                notificationStatus = BarStatus.Error;
-
-                var deviceAccessStatus = DeviceAccessInformation.CreateFromId(deviceInfo.Id).CurrentStatus;
-                if (deviceAccessStatus == DeviceAccessStatus.DeniedByUser)
-                {
-                    notificationMessage = "Access to the device was blockesd by user :" + deviceInfo.Id;
-                }
-                else
-                {
-                    notificationMessage = "UnKnown Error, Posible opened by another App :" + deviceInfo.Id;
-                }
-            }
-            rootPage.StatusBar(notificationMessage, notificationStatus);
-            return sucessfullyOpenedDevice;
-        }
-
+       
         /// <summary>
         /// Close the device, Stop the Device Watcher, Stops listening for app events, 
         /// reset object state to before a device was ever connected.
@@ -294,7 +209,7 @@ namespace HomeAutomation.EventHandler
                 UnregisterFromAppEvents();
             }
             deviceInformation = null;
-            deviceSelector = null;
+            
 
             deviceConnectedCallback = null;
             deviceCloseCallback = null;
@@ -308,7 +223,7 @@ namespace HomeAutomation.EventHandler
         {
             watcherStarted = false;
             watcherSuspended = false;
-            isEnabledAutoReconnect = true;
+        
             RegisterForDeviceWatcherEvents();
         }
 
@@ -365,14 +280,42 @@ namespace HomeAutomation.EventHandler
                                                             requestedProperties,
                                                             DeviceInformationKind.AssociationEndpoint);
 
-            deviceAddedEventHandler = new TypedEventHandler<DeviceWatcher, DeviceInformation>(this.OnDeviceAdded);
-            deviceRemovedEventHandler = new TypedEventHandler<DeviceWatcher, DeviceInformationUpdate>(this.OnDeviceRemoved);
+            deviceAddedEventHandler = new TypedEventHandler<DeviceWatcher, DeviceInformation>(this.DeviceWatcher_Added);
+            deviceUpdateEventHandler = new TypedEventHandler<DeviceWatcher, DeviceInformationUpdate>(this.DeviceWatcher_Updated);
+            deviceEmulationCompleteEventHandler = new TypedEventHandler<DeviceWatcher, Object>(this.DeviceWatcher_EnumerationCompleted);
+            deviceStoppedEventHandler = new TypedEventHandler<DeviceWatcher, Object>(this.DeviceWatcher_Stopped);
+            deviceRemovedEventHandler = new TypedEventHandler<DeviceWatcher, DeviceInformationUpdate>(this.DeviceWatcher_Removed);
 
             deviceWatcher.Added += deviceAddedEventHandler;
-            deviceWatcher.Updated += DeviceWatcher_Updated;
-            deviceWatcher.EnumerationCompleted += DeviceWatcher_EnumerationCompleted;
-            deviceWatcher.Stopped += DeviceWatcher_Stopped;
+            deviceWatcher.Updated += deviceUpdateEventHandler;
+            deviceWatcher.EnumerationCompleted += deviceEmulationCompleteEventHandler;
+            deviceWatcher.Stopped += deviceStoppedEventHandler;
             deviceWatcher.Removed += deviceRemovedEventHandler;
+        }
+
+        private void UnregisterFromDeviceWatcherEvents()
+        {
+            deviceWatcher.Added -= deviceAddedEventHandler;
+            deviceWatcher.Removed -= deviceRemovedEventHandler;
+            deviceWatcher.Updated -= deviceUpdateEventHandler;
+            deviceWatcher.EnumerationCompleted -= deviceEmulationCompleteEventHandler;
+            deviceWatcher.Stopped -= deviceStoppedEventHandler;
+
+            deviceAddedEventHandler = null;
+            deviceRemovedEventHandler = null;
+            deviceUpdateEventHandler = null;
+            deviceEmulationCompleteEventHandler = null;
+            deviceStoppedEventHandler = null;
+        }
+
+        private async void DeviceWatcher_Added(DeviceWatcher sender, DeviceInformation deviceInfo)
+        {
+            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+
+                page1.ResultCollection.Add(new Btdevice(deviceInfo));
+                rootPage.StatusBar("Searching for Bluetooth devices...", BarStatus.Sucess);
+            });
         }
 
         private async void DeviceWatcher_Stopped(DeviceWatcher sender, object args)
@@ -412,35 +355,28 @@ namespace HomeAutomation.EventHandler
             });
         }
 
-        private void UnregisterFromDeviceWatcherEvents()
+        private async void DeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate deviceUpdate)
         {
-            deviceWatcher.Added -= deviceAddedEventHandler;
-            deviceAddedEventHandler = null;
+            // for updating UI from non UI thread.
+            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            {
 
-            deviceWatcher.Removed -= deviceRemovedEventHandler;
-            deviceRemovedEventHandler = null;
+                foreach (Btdevice disp in page1.ResultCollection)
+                {
+                    if (disp.Id == deviceUpdate.Id)
+                    {
+                        page1.ResultCollection.Remove(disp);
+                        break;
+                    }
+                }
+
+                rootPage.StatusBar(
+                        String.Format("{0} devices found.", page1.ResultCollection.Count),
+                        BarStatus.Sucess);
+
+            });
 
 
-            deviceWatcher.Updated -= DeviceWatcher_Updated;
-            deviceWatcher.EnumerationCompleted -= DeviceWatcher_EnumerationCompleted;
-            deviceWatcher.Stopped -= DeviceWatcher_Stopped;
-
-        }
-
-        private void RegisterForDeviceAccessStatusChange()
-        {
-            // Enable the following registration ONLY if the Serial device under test is non-internal.
-            //
-
-            //deviceAccessInformation = DeviceAccessInformation.CreateFromId(deviceInformation.Id);
-            //deviceAccessEventHandler = new TypedEventHandler<DeviceAccessInformation, DeviceAccessChangedEventArgs>(this.OnDeviceAccessChanged);
-            //deviceAccessInformation.AccessChanged += deviceAccessEventHandler;
-        }
-
-        private void UnregisterFromDeviceAccessStatusChange()
-        {
-            deviceAccessInformation.AccessChanged -= deviceAccessEventHandler;
-            deviceAccessEventHandler = null;
         }
 
         public void StartDeviceWatcher()
@@ -461,6 +397,22 @@ namespace HomeAutomation.EventHandler
             {
                 deviceWatcher.Stop();
             }
+        }
+
+        private void RegisterForDeviceAccessStatusChange()
+        {
+            // Enable the following registration ONLY if the Serial device under test is non-internal.
+            //
+
+            deviceAccessInformation = DeviceAccessInformation.CreateFromId(deviceInformation.Id);
+            deviceAccessEventHandler = new TypedEventHandler<DeviceAccessInformation, DeviceAccessChangedEventArgs>(this.OnDeviceAccessChanged);
+            deviceAccessInformation.AccessChanged += deviceAccessEventHandler;
+        }
+
+        private void UnregisterFromDeviceAccessStatusChange()
+        {
+            deviceAccessInformation.AccessChanged -= deviceAccessEventHandler;
+            deviceAccessEventHandler = null;
         }
 
         private void OnAppSuspension(Object sender, SuspendingEventArgs args)
@@ -487,40 +439,6 @@ namespace HomeAutomation.EventHandler
             }
         }
 
-        private async void OnDeviceRemoved(DeviceWatcher sender, DeviceInformationUpdate deviceUpdate)
-        {
-            // for updating UI from non UI thread.
-            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-            {
-
-                foreach (Btdevice disp in page1.ResultCollection)
-                {
-                    if (disp.Id == deviceUpdate.Id)
-                    {
-                        page1.ResultCollection.Remove(disp);
-                        break;
-                    }
-                }
-
-                rootPage.StatusBar(
-                        String.Format("{0} devices found.", page1.ResultCollection.Count),
-                        BarStatus.Sucess);
-
-            });
-
-
-        }
-
-        private async void OnDeviceAdded(DeviceWatcher sender, DeviceInformation deviceInfo)
-        {
-            await rootPage.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-            {
-                
-                page1.ResultCollection.Add(new Btdevice(deviceInfo));
-                rootPage.StatusBar("Searching for Bluetooth devices...", BarStatus.Sucess);
-            });
-        }
-
         private async void OnDeviceAccessChanged(DeviceAccessInformation sender, DeviceAccessChangedEventArgs eventArgs)
         {
             if ((eventArgs.Status == DeviceAccessStatus.DeniedBySystem)
@@ -529,12 +447,13 @@ namespace HomeAutomation.EventHandler
                 CloseCurrentlyConnectedDevice();
             }
             else if ((eventArgs.Status == DeviceAccessStatus.Allowed)
-                && (deviceInformation != null) && isEnabledAutoReconnect)
+                && (deviceInformation != null))
             {
                 await rootPage.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(async () =>
                 {
-
-                    await OpenDeviceAsync(deviceInformation, deviceSelector);
+                    if (deviceId != null) { await ConnectAsyncFromId(deviceId); }
+                    
+                   // await OpenDeviceAsync(deviceInformation, deviceSelector);
                 }));
             }
         }
@@ -547,10 +466,29 @@ namespace HomeAutomation.EventHandler
         /// <returns></returns>
         public async Task<Boolean> ConnectAsyncFromId(string BtdeviceId)
         {
+            deviceId = BtdeviceId;
+            StopDeviceWatcher();
+
             bluetoothDevice = await BluetoothDevice.FromIdAsync(BtdeviceId);
 
             if (bluetoothDevice != null)
             {
+                if (deviceConnectedCallback != null)
+                {
+                    deviceConnectedCallback(this, deviceInformation);
+                }
+
+                if (appSuspendEventHandler == null || appResumeEventHandler == null)
+                {
+                    RegisterForAppEvents();
+                }
+
+                if (deviceAccessEventHandler == null)
+                {
+                    RegisterForDeviceAccessStatusChange();
+                }
+
+
                 var _rfcomService = await bluetoothDevice.GetRfcommServicesForIdAsync(RfcommServiceId.SerialPort, BluetoothCacheMode.Uncached);
                 if (_rfcomService.Services.Count == 0)
                 {
@@ -581,6 +519,21 @@ namespace HomeAutomation.EventHandler
             }
 
             return (bluetoothDevice != null);
+        }
+
+        public async void Send_cmd(int mode, int pin, string cmd)
+        {
+            if (_serialWriter != null)
+            {
+                _serialWriter.WriteInt32(mode);
+                _serialWriter.WriteInt32(pin);
+                _serialWriter.WriteString(cmd);
+                await _serialWriter.StoreAsync();
+            }
+            else
+            {
+                rootPage.StatusBar("Error, Please Connect and Try again...",BarStatus.Error);
+            } 
         }
     }
 }
