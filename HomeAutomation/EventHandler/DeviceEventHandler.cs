@@ -188,15 +188,14 @@ namespace HomeAutomation.EventHandler
                 CloseCurrentlyConnectedDevice();
             }
 
-            if (deviceWatcher != null)
+
+
+            if (watcherStarted)
             {
-                if (watcherStarted)
-                {
-                    StopDeviceWatcher();
-                    UnregisterFromDeviceWatcherEvents();
-                }
-                deviceWatcher = null;
+                StopDeviceWatcher();
             }
+            
+            
 
             if (deviceAccessInformation != null)
             {
@@ -240,12 +239,12 @@ namespace HomeAutomation.EventHandler
                 bluetoothDevice.Dispose();
                 bluetoothDevice = null;
 
-                String deviceId = deviceInformation.Id;
+                String btdeviceId = deviceId;
 
                 await rootPage.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(() =>
                 {
 
-                    rootPage.StatusBar(deviceId + " is closed", BarStatus.Warnning);
+                    rootPage.StatusBar(btdeviceId + " is closed", BarStatus.Warnning);
 
                 }));
 
@@ -386,6 +385,7 @@ namespace HomeAutomation.EventHandler
             if ((deviceWatcher.Status != DeviceWatcherStatus.Started)
                 && (deviceWatcher.Status != DeviceWatcherStatus.EnumerationCompleted))
             {
+                RegisterForDeviceWatcherEvents();
                 deviceWatcher.Start();
             }
         }
@@ -395,6 +395,7 @@ namespace HomeAutomation.EventHandler
             if ((deviceWatcher.Status == DeviceWatcherStatus.Started)
                 || (deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted))
             {
+                UnregisterFromDeviceWatcherEvents();
                 deviceWatcher.Stop();
             }
         }
@@ -403,8 +404,8 @@ namespace HomeAutomation.EventHandler
         {
             // Enable the following registration ONLY if the Serial device under test is non-internal.
             //
-
-            deviceAccessInformation = DeviceAccessInformation.CreateFromId(deviceInformation.Id);
+            
+            deviceAccessInformation = DeviceAccessInformation.CreateFromId(deviceId);
             deviceAccessEventHandler = new TypedEventHandler<DeviceAccessInformation, DeviceAccessChangedEventArgs>(this.OnDeviceAccessChanged);
             deviceAccessInformation.AccessChanged += deviceAccessEventHandler;
         }
@@ -463,7 +464,7 @@ namespace HomeAutomation.EventHandler
         /// This is a async task to connect to device and create _socket, _dataReader and _dataWriter object.
         /// </summary>
         /// <param name="BtdeviceId"></param>
-        /// <returns></returns>
+        /// <returns> boolean</returns>
         public async Task<Boolean> ConnectAsyncFromId(string BtdeviceId)
         {
             deviceId = BtdeviceId;
@@ -490,9 +491,9 @@ namespace HomeAutomation.EventHandler
 
 
                 var _rfcomService = await bluetoothDevice.GetRfcommServicesForIdAsync(RfcommServiceId.SerialPort, BluetoothCacheMode.Uncached);
-                if (_rfcomService.Services.Count == 0)
+                if (_rfcomService.Services.Count <= 0)
                 {
-                    rootPage.StatusBar("Serial service not found on device.", BarStatus.Error);
+                    rootPage.StatusBar("Serial service not found on "+ bluetoothDevice.Name, BarStatus.Error);
                     return false;
                 }
 

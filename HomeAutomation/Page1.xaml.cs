@@ -38,14 +38,7 @@ namespace HomeAutomation
     public sealed partial class Page1 : Page
     {
         private MainPage rootPage = MainPage.current;
-               
-        private DeviceWatcher deviceWatcher = null;
-        private RfcommDeviceService chatService = null;
-       
-        private StreamSocket _socket;
-        private DataReader serialReader;
-        private DataWriter serialWriter;
-        
+                 
         public static Page1 current;
 
         //  private GattDeviceService service;
@@ -63,7 +56,7 @@ namespace HomeAutomation
             ResultCollection = new ObservableCollection<Btdevice>();
             current = this;
 
-            DeviceEventHandler.CreateNewDeviceEventHandler();
+           // DeviceEventHandler.CreateNewDeviceEventHandler();
         }
 
         private  void Search_btn_Click(object sender, RoutedEventArgs e)
@@ -76,9 +69,17 @@ namespace HomeAutomation
         }
 
 
-        private void Connect_btn_Click(object sender, RoutedEventArgs e)
-        {        
-            Connect2(); 
+        private async void Connect_btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (resultListView.SelectedItem == null)
+            {
+                rootPage.StatusBar("please selet an item to connect", BarStatus.Error);
+                return;
+            }
+            // selecting bluetooth device
+            Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
+
+            await DeviceEventHandler.Current.ConnectAsyncFromId(btSelectedDevice.Id);
         }
 
 
@@ -149,7 +150,7 @@ namespace HomeAutomation
 
         private void Send_btn_Click(object sender, RoutedEventArgs e)
         {
-            SendMessage();
+            
         }
  
 
@@ -160,223 +161,15 @@ namespace HomeAutomation
             conversionList.Visibility = Visibility.Visible;
         }
 
-        private async void ReceiveStringLoop(DataReader chatReader)
-        {
-          try
-            {
-                uint size = await chatReader.LoadAsync(sizeof(uint));
-                if (size < sizeof(uint))
-                {
-                    Disconnect("Remote device terminated connection - make sure only one instance of server is running on remote device");
-                    return;
-                }
+     
 
-                
-                uint stringLength = serialReader.ReadUInt32();
-               uint actualStringLength = await serialReader.LoadAsync(stringLength);
+        
 
-                if (actualStringLength != stringLength)
-                {
-                    // The underlying socket was closed before we were able to read the whole data
-                    return;
-                }
-
-                conversionList.Items.Add("Received: " + serialReader.ReadString(8));
-
-               ReceiveStringLoop(serialReader);
-            }
-            catch (Exception ex)
-            {
-                lock (this)
-                {
-                    if (_socket == null)
-                    {
-                        // Do not print anything here -  the user closed the socket.
-                        // HResult = 0x80072745 - catch this (remote device disconnect) ex = {"An established connection was aborted by the software in your host machine. (Exception from HRESULT: 0x80072745)"}
-                    }
-                    else
-                    {
-                        Disconnect("Read stream failed with error: " + ex.Message);
-                    }
-                }
-            }
-        }
-
-        private async void SendMessage()
-        {
-            try
-            {
-                if (message_box.Text.Length != 0)
-                {
-                    uint inputelement = serialWriter.MeasureString(message_box.Text);
-                    serialWriter.WriteUInt32(inputelement);
-                    serialWriter.WriteString(message_box.Text);
-
-                    conversionList.Items.Add("Sent: " + message_box.Text);
-                    message_box.Text = "";
-                    await serialWriter.StoreAsync();
-                     
-
-                }
-            }
-            catch (Exception ex) when ((uint)ex.HResult == 0x80072745)
-            {
-                // The remote device has disconnected the connection
-                rootPage.StatusBar("Remote side disconnect: " + ex.HResult.ToString() + " - " + ex.Message,
-                    BarStatus.Warnning);
-            }
-        }
-
-        private void Disconnect(string disconnectReason)
-        {
-            //throw new NotImplementedException();
-            if (serialWriter != null)
-            {
-              serialWriter.DetachStream();
-                serialWriter = null;
-            }
-
-
-            if (chatService != null)
-            {
-                chatService.Dispose();
-                chatService = null;
-            }
-            lock (this)
-            {
-                if (_socket != null)
-                {
-                    _socket.Dispose();
-                    _socket = null;
-                }
-            }
-
-            rootPage.StatusBar(disconnectReason, BarStatus.Warnning);
-            ResetUI();
-        }
-
-        private void ResetUI()
-        {
-            //throw new NotImplementedException();
-            send_btn.IsEnabled = true;
-            Search_btn.IsEnabled = true;
-            resultListView.Visibility = Visibility.Visible;
-            conversionList.Visibility = Visibility.Visible;
-        }
-
-
-        public async void Connect2()
-        {
-           // checking if device is selected or not.
-            if (resultListView.SelectedItem == null)
-            {
-                rootPage.StatusBar("please selet an item to connect", BarStatus.Error);
-                return;
-            }
-            // selecting bluetooth device
-            Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
-
-            await DeviceEventHandler.Current.ConnectAsyncFromId(btSelectedDevice.Id);
-            return;
-            //initialize bluetooth device
-            var btDevice = await BluetoothDevice.FromIdAsync(btSelectedDevice.Id);
-
-            // checking device initiallized or not.
-            if (btDevice == null)
-            {
-                rootPage.StatusBar("Connection device error", BarStatus.Error);
-                return;
-            }
-            // getting service result from device regarding to serial port.
-            var _rfcomService = await btDevice.GetRfcommServicesForIdAsync(RfcommServiceId.SerialPort,BluetoothCacheMode.Uncached);
-                if (_rfcomService.Services.Count == 0)
-                {
-                    rootPage.StatusBar("Serial service not found on device.", BarStatus.Error);
-                    return;
-                }
-                
-
-            message_box.Text = _rfcomService.Services.Count().ToString();
-            // chat service storing from result arrey
-            chatService = _rfcomService.Services[0];
-
-            BtWatcherStop();
-
-            
-            // socket assingment
-          lock(this) { _socket = new StreamSocket(); } // for marking this as crtical section.
-
-            message_box.Text = chatService.ServiceId.ToString();
-
-            try
-            {
-                // socket initializesd
-                await _socket.ConnectAsync(chatService.ConnectionHostName, chatService.ConnectionServiceName, SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
-                rootPage.StatusBar("connection to device done sucessfully", BarStatus.Sucess);
-
-
-                SetChatUI(chatService.ServiceId.ToString(), btDevice.Name);
-
-                // reader and writer assingment.
-                serialWriter = new DataWriter(_socket.OutputStream);
-                serialReader = new DataReader(_socket.InputStream);
-
-                ResetUI();
+     
 
 
 
-
-
-               /* byte b;//size of buffer protocol
-                string result;
-                while (true)
-                {
-                   await serialReader.LoadAsync(sizeof(uint));
-
-
-                    b = serialReader.ReadByte();
-                    result=serialReader.ReadString(Convert.ToUInt32(b));
-                    conversionList.Items.Add("Sent: " +  b );
-                   
-                    conversionList.Items.Add("Sent: " + result);
-
-                    rootPage.StatusBar("bytes read successfully!", BarStatus.Warnning);
-
-                    
-                }*/
-
-
-
-
-
-
-                
-
-
-               //ReceiveStringLoop(serialReader);
-            }
-            catch(Exception ex)
-            { rootPage.StatusBar("Error : "+ex.ToString(), BarStatus.Error); }
-        }
-
-
-        // under development function
-        public string StatusRecieved()
-        {
-            uint size;
-            Task t1 = new Task(async () => {
-                size = await serialReader.LoadAsync(sizeof(uint));
-            });
-
-            t1.Start();
-            t1.Wait();
-
-            byte b = serialReader.ReadByte();
-            uint c = Convert.ToUInt32(b);
-            return serialReader.ReadString(c);
-            
-
-        }
+      
 
 
 

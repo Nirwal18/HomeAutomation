@@ -25,39 +25,39 @@
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s2" RelativePanel.Below="s1">
-                <ToggleSwitch Name="toggleSwicth2" OnContent="Light 2 On" OffContent="Light 2 Off" Toggled="ToggleSwitch2_Toggled"/>
+                <ToggleSwitch Name="toggleSwicth2" OnContent="Light 2 On" OffContent="Light 2 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s3" RelativePanel.Below="s2">
-                <ToggleSwitch Name="toggleSwicth3" OnContent="Light 3 On" OffContent="Light 3 Off"/>
+                <ToggleSwitch Name="toggleSwicth3" OnContent="Light 3 On" OffContent="Light 3 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s4" RelativePanel.Below="s3">
-                <ToggleSwitch Name="toggleSwicth4" OnContent="Light 4 On" OffContent="Light 4 Off"/>
+                <ToggleSwitch Name="toggleSwicth4" OnContent="Light 4 On" OffContent="Light 4 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s5" RelativePanel.Below="s4">
-                <ToggleSwitch Name="toggleSwicth5" OnContent="Light 5 On" OffContent="Light 5 Off"/>
+                <ToggleSwitch Name="toggleSwicth5" OnContent="Light 5 On" OffContent="Light 5 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s6" RelativePanel.Below="s5">
-                <ToggleSwitch Name="toggleSwicth6" OnContent="Light 6 On" OffContent="Light 6 Off"/>
+                <ToggleSwitch Name="toggleSwicth6" OnContent="Light 6 On" OffContent="Light 6 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s7" RelativePanel.Below="s6">
-                <ToggleSwitch Name="toggleSwicth7" OnContent="Light 7 On" OffContent="Light 7 Off"/>
+                <ToggleSwitch Name="toggleSwicth7" OnContent="Light 7 On" OffContent="Light 7 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s8" RelativePanel.Below="s7">
-                <ToggleSwitch Name="toggleSwicth8" OnContent="Light 8 On" OffContent="Light 8 Off"/>
+                <ToggleSwitch Name="toggleSwicth8" OnContent="Light 8 On" OffContent="Light 8 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s9" RelativePanel.Below="s8">
-                <ToggleSwitch Name="toggleSwicth9" OnContent="Light 9 On" OffContent="Light 9 Off"/>
+                <ToggleSwitch Name="toggleSwicth9" OnContent="Light 9 On" OffContent="Light 9 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
             <StackPanel Orientation="Vertical" Name="s10" RelativePanel.Below="s9">
-                <ToggleSwitch Name="toggleSwicth10" OnContent="Light 10 On" OffContent="Light 10 Off"/>
+                <ToggleSwitch Name="toggleSwicth10" OnContent="Light 10 On" OffContent="Light 10 Off" Toggled="ToggleSwitch1_Toggled"/>
                 <Border BorderThickness="1" Width="390" BorderBrush="Gray"/>
             </StackPanel>
          

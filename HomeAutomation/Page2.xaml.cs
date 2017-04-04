@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using HomeAutomation.Model; //for accessing class in model folder
 using HomeAutomation.EventHandler; //for accessing class in EventHandler folder
+using Windows.UI.Popups;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -28,11 +29,7 @@ namespace HomeAutomation
         private MainPage rootPage = MainPage.current;
         public Page1 page1 = Page1.current;         // for Accessing Page1 Resource
 
-        public ObservableCollection<T> toglePannel 
-        {
-            get;
-            private set;
-        }
+        
 
         public Page2()
         {
@@ -46,14 +43,17 @@ namespace HomeAutomation
 
         private void ToggleSwitch1_Toggled(object sender, RoutedEventArgs e)
         {
-            
-            if(this.toggleSwicth1.IsOn)
+            ToggleSwitch t = sender as ToggleSwitch;
+           
+            int x = Convert.ToInt32(t.Name.Substring(12));
+                
+            if (t.IsOn)
             {
-                page1.Send_cmd(1,3,"ON;");
+                DeviceEventHandler.Current.Send_cmd(1,x,"ON");
             }
             else
             {
-                page1.Send_cmd(1,3,"OFF;");
+                DeviceEventHandler.Current.Send_cmd(1, x, "OFF");              
             }
            
             
