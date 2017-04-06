@@ -54,7 +54,7 @@ namespace HomeAutomation.EventHandler
 
         private Boolean watcherSuspended;
         private Boolean watcherStarted;
-        private Boolean isEnabledAutoReconnect;
+        
 
         private static StreamSocket _socket;
         private static DataReader _serialReader;
@@ -208,11 +208,13 @@ namespace HomeAutomation.EventHandler
                 UnregisterFromAppEvents();
             }
             deviceInformation = null;
-            
 
+            bluetoothDevice = null;
+            _socket.Dispose();
+            _socket = null;
             deviceConnectedCallback = null;
             deviceCloseCallback = null;
-            isEnabledAutoReconnect = true;
+           
         }
 
         /// <summary>
@@ -524,7 +526,7 @@ namespace HomeAutomation.EventHandler
 
         public async void Send_cmd(int mode, int pin, string cmd)
         {
-            if (_serialWriter != null)
+            if (_serialWriter != null && _socket != null) 
             {
                 _serialWriter.WriteInt32(mode);
                 _serialWriter.WriteInt32(pin);

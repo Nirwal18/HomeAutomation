@@ -43,9 +43,9 @@ namespace HomeAutomation
 
         private void ToggleSwitch1_Toggled(object sender, RoutedEventArgs e)
         {
-            ToggleSwitch t = sender as ToggleSwitch;
+            ToggleSwitch t = (ToggleSwitch)sender;
            
-            int x = Convert.ToInt32(t.Name.Substring(12));
+            int x = Convert.ToInt32(t.Name.Substring(12))+2;
                 
             if (t.IsOn)
             {
@@ -58,6 +58,9 @@ namespace HomeAutomation
            
             
         }
+
+
+
 
      
     }

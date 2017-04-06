@@ -13,7 +13,7 @@
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
-            
+
                 <TextBlock Text="{x:Bind Name}" 
                            Grid.Row="0"
                            Style="{ThemeResource TitleTextBlockStyle}" 
@@ -35,69 +35,47 @@
                             Margin="80,0,0,0"
                            FontSize="18" 
                            VerticalAlignment="Center"/>
-                <Button Name="PairUnpair_btn"
+                <TextBlock Name="PairUnpair_btn"
                         Grid.Row="1"
-                        Content="{x:Bind pairBtnString}"
-                        Click="PairUnpair_btn_Click"
+                        Text="{x:Bind pairBtnString}"
                         Margin="150,0,0,0" 
                         Width="65"/>
 
-            
+
             </Grid>
         </DataTemplate>
-            
+
     </Page.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
             <TextBlock Text="Click on Search Button to start Searching" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
             <RelativePanel HorizontalAlignment="Stretch">
-            <Button Name="Search_btn" Click="Search_btn_Click" Content="Search" HorizontalAlignment="Left"/>
-               
-            </RelativePanel>
-        </StackPanel>
+                <Button Name="Search_btn" Click="Search_btn_Click" Content="Search" HorizontalAlignment="Left"/>
 
-        <ScrollViewer Grid.Row="1" >
-            
-             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                
-                    <ListView Name="resultListView"
+            </RelativePanel>
+            <ListView Name="resultListView"
                               Grid.Row="0"
                           Visibility="Visible"
                           ItemsSource="{x:Bind ResultCollection}"
                           ItemTemplate="{StaticResource btlistTemplet}" >
-                    </ListView>
+            </ListView>
+        </StackPanel>
 
-                <ListView Name="conversionList"
-                          Grid.Row="1"
-                          Visibility="Visible">
-                </ListView>
-                 
-             
-                
-                
-            </Grid>
-            
-                
-                
-            
-        </ScrollViewer>
+      
 
-        <StackPanel Grid.Row="3" Margin="0,10,0,0">
-            <RelativePanel Height="40">
+        
+
+            <RelativePanel Height="40" Grid.Row="1" VerticalAlignment="Bottom">
                 <Button Name="disconnect_btn"
                         Click="Disconnect_btn_Click"
                         Content="Disconnect"
+                        Visibility="Collapsed"
                         RelativePanel.AlignLeftWithPanel="True"
                         Margin="5,4,0,0"/>
                 <Button Name="Connect_btn" 
@@ -106,17 +84,7 @@
                         RelativePanel.AlignRightWithPanel="True"
                         Margin="0,4,5,0" />
             </RelativePanel>
-            <TextBox Name="message_box"
-                                 RelativePanel.AlignLeftWithPanel="True"
-                             HorizontalAlignment="Stretch"/>
-            <RelativePanel Margin="10,0,0,0">
 
-                <Button Name="send_btn"
-                            Content="Send"
-                            Click="Send_btn_Click"
-                            HorizontalAlignment="Right"/>
-                
-            </RelativePanel>
-        </StackPanel>
+        
     </Grid>
 </Page>

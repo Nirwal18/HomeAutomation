@@ -1,32 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Microsoft.Toolkit.Uwp.UI;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 using HomeAutomation.Model;
 using HomeAutomation.EventHandler;
-using System.Diagnostics;
-using Windows.Devices.AllJoyn;
-using Windows.Devices.Bluetooth;
-using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
 using System.Collections.ObjectModel;
-using Windows.Storage.Streams;
-using Windows.Networking.Sockets;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.SerialCommunication;
-using System.Threading.Tasks;
-using System.Threading;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -38,7 +17,7 @@ namespace HomeAutomation
     public sealed partial class Page1 : Page
     {
         private MainPage rootPage = MainPage.current;
-                 
+
         public static Page1 current;
 
         //  private GattDeviceService service;
@@ -55,36 +34,73 @@ namespace HomeAutomation
             this.InitializeComponent();
             ResultCollection = new ObservableCollection<Btdevice>();
             current = this;
-
-           // DeviceEventHandler.CreateNewDeviceEventHandler();
+            this.Loaded += Page1_Loaded;
+            DeviceEventHandler.CreateNewDeviceEventHandler();
         }
 
-        private  void Search_btn_Click(object sender, RoutedEventArgs e)
+        private void Page1_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (DeviceEventHandler.Current.BluetoothDevice != null) ;
+            {
+                Connect_btn.IsEnabled = false;
+                disconnect_btn.IsEnabled = true;
+                disconnect_btn.Visibility = Visibility.Visible;
+            }
+            
+        }
+
+       
+
+        private void Search_btn_Click(object sender, RoutedEventArgs e)
         {
             Search_btn.IsEnabled = false;
             ResultCollection.Clear();
             rootPage.StatusBar("Searching for bluetooth device", BarStatus.Sucess);
             //BtWatcherStart();     
             DeviceEventHandler.Current.StartDeviceWatcher();
+            if (DeviceEventHandler.Current.BluetoothDevice == null) { Connect_btn.IsEnabled = true; }
+            
         }
 
 
         private async void Connect_btn_Click(object sender, RoutedEventArgs e)
         {
+            Connect_btn.IsEnabled = false;
+
             if (resultListView.SelectedItem == null)
             {
                 rootPage.StatusBar("please selet an item to connect", BarStatus.Error);
                 return;
             }
+            disconnect_btn.Visibility = Visibility.Visible;
             // selecting bluetooth device
             Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
 
-            await DeviceEventHandler.Current.ConnectAsyncFromId(btSelectedDevice.Id);
+            try
+            {
+                await DeviceEventHandler.Current.ConnectAsyncFromId(btSelectedDevice.Id);
+            }
+            catch (Exception ex)
+            {
+                ContentDialog cDialog = new ContentDialog()
+                {
+                    Title = "Bluetooth",
+                    Content = "Please enable Bluetooth first.",
+                    IsPrimaryButtonEnabled = true,
+                    PrimaryButtonText = "Exit",
+                    
+
+                };
+                if(await cDialog.ShowAsync() == ContentDialogResult.Primary) { cDialog.Hide(); }
+                disconnect_btn.Visibility = Visibility.Collapsed;
+                Connect_btn.IsEnabled = true;
+            }
+
         }
 
 
-// serial port connect optional not woking with bluetooth.
-     public async void Connect()
+        // serial port connect optional not woking with bluetooth.
+        public async void Connect()
         {
             Btdevice btdevice = resultListView.SelectedItem as Btdevice;
 
@@ -98,15 +114,15 @@ namespace HomeAutomation
             serialPort.DataBits = 8;
         }
 
-   
-       
-        
 
 
 
-       
+
+
+
+
         private async void BtPair()
-        {                       
+        {
             rootPage.StatusBar("Paring Started Please Wait...", BarStatus.Warnning);
 
             Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
@@ -122,13 +138,13 @@ namespace HomeAutomation
             DeviceUnpairingResult dupr = await deviceInfoDisp.DeviceInformation.Pairing.UnpairAsync();
 
             rootPage.StatusBar("Unparing Result" + dupr.Status.ToString(), dupr.Status == DeviceUnpairingResultStatus.Unpaired ? BarStatus.Sucess : BarStatus.Error);
-                        
+
         }
 
         private void PairUnpair_btn_Click(object sender, RoutedEventArgs e)
         {
             resultListView.IsEnabled = false;
-           
+
             Btdevice deviceInfoDisp = resultListView.SelectedItem as Btdevice;
             if (deviceInfoDisp == null)
             {
@@ -148,28 +164,18 @@ namespace HomeAutomation
         }
 
 
-        private void Send_btn_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
- 
-
-        private void SetChatUI(string v, string name)
-        {
-            send_btn.IsEnabled = false;
-            resultListView.Visibility = Visibility.Collapsed;
-            conversionList.Visibility = Visibility.Visible;
-        }
-
-     
-
-        
-
-     
+       
 
 
 
-      
+
+
+
+
+
+
+
+
 
 
 
@@ -177,12 +183,12 @@ namespace HomeAutomation
         private void Disconnect_btn_Click(object sender, RoutedEventArgs e)
         {
             DeviceEventHandler.Current.CloseDevice();
-            rootPage.StatusBar("Disconnect SucessFull",BarStatus.Normal);
+            rootPage.StatusBar("Disconnect SucessFull", BarStatus.Normal);
             Search_btn.IsEnabled = true;
         }
     }
 
 
-    
-    
 }
+    
+
