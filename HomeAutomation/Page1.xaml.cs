@@ -40,7 +40,7 @@ namespace HomeAutomation
 
         private void Page1_Loaded(object sender, RoutedEventArgs e)
         {
-            if (DeviceEventHandler.Current.BluetoothDevice != null) ;
+            if (DeviceEventHandler.Current.BluetoothDevice != null) 
             {
                 Connect_btn.IsEnabled = false;
                 disconnect_btn.IsEnabled = true;
@@ -76,9 +76,17 @@ namespace HomeAutomation
             // selecting bluetooth device
             Btdevice btSelectedDevice = resultListView.SelectedItem as Btdevice;
 
+            // saving device in Local Setting For Later Use in Auto Reconnect
+            var applicationData = Windows.Storage.ApplicationData.Current;
+            var localSettings = applicationData.LocalSettings;
+            localSettings.Values["LastDeviceId"] = btSelectedDevice.Id;
+
             try
             {
-                await DeviceEventHandler.Current.ConnectAsyncFromId(btSelectedDevice.Id);
+                if(await DeviceEventHandler.Current.ConnectAsyncFromId(btSelectedDevice.Id))
+                {
+                    rootPage.MainPage_Navigate_Frame(typeof(Page2));
+                }
             }
             catch (Exception ex)
             {
@@ -91,6 +99,7 @@ namespace HomeAutomation
                     
 
                 };
+                // if bluetooth is ni=ot enabled then msg popup
                 if(await cDialog.ShowAsync() == ContentDialogResult.Primary) { cDialog.Hide(); }
                 disconnect_btn.Visibility = Visibility.Collapsed;
                 Connect_btn.IsEnabled = true;

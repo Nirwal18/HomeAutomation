@@ -8,6 +8,19 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Stretch" Margin="10,0,0,0">
+            <TextBlock x:Name="label1" Text="Remember Last Device" FontSize="20"/>
+            <CheckBox x:Name="rememberLastDevice_checkbox"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Stretch" Margin="10,0,0,0">
+            <TextBlock x:Name="label2" Text="Auto Connect" FontSize="20"/>
+            <CheckBox x:Name="autoConnectOnStartup_checkbox"/>
+        </StackPanel>
+        <Button Grid.Row="2" Content="Save" Click="save_btn_Click"/>
     </Grid>
 </Page>

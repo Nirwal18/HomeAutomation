@@ -22,9 +22,29 @@ namespace HomeAutomation
     /// </summary>
     public sealed partial class Page3 : Page
     {
+        public static Page3 current;
         public Page3()
         {
             this.InitializeComponent();
+            current = this;
+
+        }
+
+        private void save_btn_Click(object sender, RoutedEventArgs e)
+        {
+            var applicationData = Windows.Storage.ApplicationData.Current;
+
+            var localSettings = applicationData.LocalSettings;
+            localSettings.Values["AutoConnect"] = autoConnectOnStartup_checkbox.IsChecked;
+            localSettings.Values["RememberLastDevice"] = rememberLastDevice_checkbox.IsChecked;
+        }
+
+        private void Read_btn_Click(object sender, RoutedEventArgs e)
+        {
+            var applicationData = Windows.Storage.ApplicationData.Current;
+
+            var localSettings = applicationData.LocalSettings;
+            label1.Text = localSettings.Values["Stext"].ToString();
         }
     }
 }

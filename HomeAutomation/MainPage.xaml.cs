@@ -16,6 +16,8 @@ using Windows.Devices.AllJoyn;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
+using HomeAutomation.EventHandler;
+using System.Collections.ObjectModel;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -26,18 +28,57 @@ namespace HomeAutomation
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public Page3 page3 = Page3.current;
         public static MainPage current;
+
+        public ObservableCollection<Scenario> SResultCollection
+        {
+            get;
+            private set;
+        }
+
         public MainPage()
         {
             this.InitializeComponent();
+            SResultCollection = new ObservableCollection<Scenario>();
             current = this;
             this.Loaded += MainPage_Loaded;
+            
+
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             Frame_container.Navigate(typeof(Page1));
-          //  throw new NotImplementedException();
+            StatusBar_Text.Text = string.Empty;
+
+            // auto connect algorithm
+            AutoReconnect();
+            
+           
+        }
+
+        private async void AutoReconnect()
+        {
+            // Retrive Setting From local Storage
+            var applicationData = Windows.Storage.ApplicationData.Current;
+            var localSettings = applicationData.LocalSettings;
+
+            if (localSettings.Values["RememberLastDevice"] != null &&
+                localSettings.Values["AutoConnect"] != null &&
+            localSettings.Values["LastDeviceId"] != null)
+            {
+                bool autoConnect_setting = (Boolean)localSettings.Values["AutoConnect"];
+                bool rememberLastDevice_setting = (Boolean)localSettings.Values["RememberLastDevice"];
+
+                if (autoConnect_setting == true && rememberLastDevice_setting == true)
+                {
+                    if (await DeviceEventHandler.Current.ConnectAsyncFromId(localSettings.Values["LastDeviceId"].ToString()))
+                    {
+                        Frame_container.Navigate(typeof(Page2));
+                    }
+                }
+            }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -67,6 +108,10 @@ namespace HomeAutomation
         }
 
 
+        public void MainPage_Navigate_Frame(Type page)
+        {
+            Frame_container.Navigate(page);
+        }
 
 
         private void Hamburger_menu_click(object sender, RoutedEventArgs e)
@@ -132,6 +177,17 @@ namespace HomeAutomation
                 }
             }
 
+        }
+
+        private void TextBlock_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            Frame_container.Navigate(typeof(Page3));
+        }
+
+        private void slider_PaneClosed(SplitView sender, object args)
+        {
+            if (!slider.IsPaneOpen) { hamburgerMenu_btn.IsChecked = true; }
+            else { hamburgerMenu_btn.IsChecked = false; }
         }
     }
 

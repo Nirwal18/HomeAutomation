@@ -37,8 +37,9 @@ namespace HomeAutomation
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             Scenario s = value as Scenario;
-            return (MainPage.current.Scenarios.IndexOf(s) + 1) + ". " + s.Title;
+            return s.Title;
         }
+       
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
