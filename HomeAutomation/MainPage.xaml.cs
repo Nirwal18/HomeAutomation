@@ -145,7 +145,7 @@ namespace HomeAutomation
                     StatusBoder.Background = new SolidColorBrush(Windows.UI.Colors.Yellow);
                     break;
                 case BarStatus.Normal:
-                    StatusBoder.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(230,231,232,6));
+                    StatusBoder.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(240,240,240,240));
                     break;
             }
 

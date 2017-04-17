@@ -1,21 +1,14 @@
 ﻿using System;
 using Windows.Foundation;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Input;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Enumeration;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
-using System.ServiceModel.Dispatcher;
-using System.Net.Sockets;
 using Windows.Networking.Sockets;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Storage.Streams;
 using HomeAutomation.Model;
-using System.Collections.ObjectModel;
 using Windows.Devices.Bluetooth.Rfcomm;
 
 namespace HomeAutomation.EventHandler
@@ -524,12 +517,10 @@ namespace HomeAutomation.EventHandler
             return (bluetoothDevice != null);
         }
 
-        public async void Send_cmd(int mode, int pin, string cmd)
+        public async void Send_cmd(string cmd)
         {
             if (_serialWriter != null && _socket != null) 
             {
-                _serialWriter.WriteInt32(mode);
-                _serialWriter.WriteInt32(pin);
                 _serialWriter.WriteString(cmd);
                 await _serialWriter.StoreAsync();
             }

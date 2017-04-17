@@ -11,7 +11,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Stretch" Margin="10,0,0,0">
             <TextBlock x:Name="label1" Text="Remember Last Device" FontSize="20"/>
@@ -20,7 +20,90 @@
         <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Stretch" Margin="10,0,0,0">
             <TextBlock x:Name="label2" Text="Auto Connect" FontSize="20"/>
             <CheckBox x:Name="autoConnectOnStartup_checkbox"/>
+            <Button Content="Save" Click="save_btn_Click"/>
         </StackPanel>
-        <Button Grid.Row="2" Content="Save" Click="save_btn_Click"/>
+        <Grid Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,5,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                       Text="Save Command For Buttun"
+                       FontSize="20" Margin="5,0,0,5"/>
+            
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="5,0,0,0">
+                <TextBlock x:Name="label3" Text="Switch 1" FontSize="20"/>
+                <TextBox x:Name="textBox1"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="5,0,0,0">
+                <TextBlock x:Name="label4" Text="Switch 2" FontSize="20"/>
+                <TextBox x:Name="textBox2"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="0" Margin="5,0,0,0">
+                <TextBlock x:Name="label5" Text="Switch 3" FontSize="20"/>
+                <TextBox x:Name="textBox3"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="5,0,0,0">
+                <TextBlock x:Name="label6" Text="Switch 4" FontSize="20"/>
+                <TextBox x:Name="textBox4"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Grid.Column="0" Margin="5,0,0,0">
+                <TextBlock x:Name="label7" Text="Switch 5" FontSize="20"/>
+                <TextBox x:Name="textBox5"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="3" Grid.Column="1" Margin="5,0,0,0">
+                <TextBlock x:Name="label8" Text="Switch 6" FontSize="20"/>
+                <TextBox x:Name="textBox6"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Grid.Column="0" Margin="5,0,0,0">
+                <TextBlock x:Name="label9" Text="Switch 7" FontSize="20"/>
+                <TextBox x:Name="textBox7"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Grid.Column="1" Margin="5,0,0,0">
+                <TextBlock x:Name="label10" Text="Switch 8" FontSize="20"/>
+                <TextBox x:Name="textBox8"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="5" Grid.Column="0" Margin="5,0,0,0">
+                <TextBlock x:Name="label11" Text="Switch 9" FontSize="20"/>
+                <TextBox x:Name="textBox9"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="5" Grid.Column="1" Margin="5,0,0,0">
+                <TextBlock x:Name="label12" Text="Switch 10" FontSize="20"/>
+                <TextBox x:Name="textBox10"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="5,0,0,0">
+                <RadioButton Name="cmdOn_radio" Content="Set for On"/>
+                <RadioButton Name="cmdOff_radio" Content=" Set for Off"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <Button Content="Save Command Values" Margin="5,10,0,0" Click="SaveCmd_button_Click"/>
+                <Button Content="Retrive values" Width="170" Margin="5,10,0,0" Click="Retrive_button_Click"/>
+            </StackPanel>
+            
+        </Grid>
+
+
     </Grid>
 </Page>
