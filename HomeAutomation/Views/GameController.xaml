@@ -1,0 +1,92 @@
+﻿<Page
+    x:Class="HomeAutomation.GameController"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HomeAutomation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="WindowLayout">
+                <VisualState x:Name="pc">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="700"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <!--<Setter Target="ps.Background" Value="Red"/>-->
+                        <!--<Setter Target="ps.Height" Value="500"/>-->
+                        <Setter Target="ps.Orientation" Value="Vertical"/>
+                        <Setter Target="ps.(Grid.RowSpan)" Value="2"/>
+                        <Setter Target="ps.(Grid.Row)" Value="1"/>
+                        <Setter Target="ps.HorizontalAlignment" Value="Left"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>    
+        </VisualStateManager.VisualStateGroups>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel  x:Name="ps" Grid.Row="0" Grid.Column="0" Grid.RowSpan="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Width="150" HorizontalAlignment="Left">
+                <TextBlock FontSize="20" Text="X :"/>
+                <TextBlock Name="XposText" 
+                           FontSize="20" 
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Top"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Width="150" HorizontalAlignment="Left">
+                <TextBlock FontSize="20">Y :</TextBlock>
+                <TextBlock Name="YposText" 
+                           FontSize="20" 
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Top"/>
+            </StackPanel>
+
+
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+
+
+            <Canvas  HorizontalAlignment="Center" VerticalAlignment="Center" Height="355" Width="335" Margin="0,0,0,0">
+                <TextBlock Canvas.Left="150" Canvas.Top="0"
+                FontFamily="Segoe UI Symbol"
+                FontSize="40" Text="&#x2B9D;"
+               Foreground="SkyBlue" Margin="0,0,0,0"/>
+                <TextBlock Canvas.Left="0" Canvas.Top="150"
+                FontFamily="Segoe UI Symbol" Foreground="SkyBlue" 
+                FontSize="40" Text="&#x2B9C;"/>
+                <TextBlock Canvas.Left="300" Canvas.Top="150"
+                FontFamily="Segoe UI Symbol" Foreground="SkyBlue"
+                       FontSize="40" Text="&#x2B9e;"/>
+                <TextBlock Canvas.Left="150" Canvas.Top="300"
+                FontFamily="Segoe UI Symbol" Foreground="SkyBlue"
+                       FontSize="40" Text="&#x2B9f;"/>
+                <Ellipse x:Name="circle"
+                StrokeThickness="10"
+                Stroke="SkyBlue" 
+                Fill="AliceBlue"
+                     Canvas.Top="125"
+                     Canvas.Left="120"
+                ManipulationStarted="Ellipse_ManipulationStarted"
+                ManipulationDelta="Ellipse_ManipulationDelta"
+                ManipulationCompleted="Ellipse_ManipulationCompleted"
+                ManipulationMode="TranslateY,TranslateX" Width="90" Height="90">
+                    <Ellipse.RenderTransform>
+                        <CompositeTransform x:Name="circle_transform"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+            </Canvas>
+        </StackPanel>
+
+    </Grid>
+</Page>

@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+    <Grid Background="Transparent" >
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -20,7 +20,7 @@
 
         </StackPanel>
 
-        <ScrollViewer  Margin="10,20,0,0">
+        <ScrollViewer  Margin="10,20,0,0" Background="Transparent" IsEnabled="True" HorizontalScrollMode="Enabled">
             <StackPanel Grid.Row="1" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
                 <StackPanel Orientation="Vertical" Name="s1">
                     <ToggleSwitch Name="toggleSwicth1" OnContent="Light 1 On" OffContent="Light 1 Off" Toggled="ToggleSwitch1_Toggled"/>

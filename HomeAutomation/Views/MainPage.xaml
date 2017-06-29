@@ -11,10 +11,20 @@
 
     <Page.Resources>
         <local:ScenarioBindingConverter x:Key="ScenarioConverter"></local:ScenarioBindingConverter>
-       
+        <ImageSource x:Key="BackGroundImageSource">Assets/Image/blur-wallpaper-10-0-s-307x512.jpg</ImageSource>
+
     </Page.Resources>
-   
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.TopAppBar>
+        <AppBar/>
+    </Page.TopAppBar>
+
+    
+    <Grid>
+
+        <Grid.Background>
+            <ImageBrush Stretch="UniformToFill" ImageSource="{StaticResource BackGroundImageSource}"/>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition/>
@@ -64,7 +74,7 @@
                             </ListBox.ItemTemplate>
 
                         </ListBox >
-                        
+
                         <Border BorderBrush="DarkGray" BorderThickness="0.5" VerticalAlignment="Bottom" Margin="0,0,0,40"/>
                         <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="10,0,0,10">
 
@@ -75,10 +85,10 @@
                                        Margin="7,0,0,0"/>
                         </StackPanel>
 
-                       
+
 
                     </Grid>
-                    
+
 
                 </SplitView.Pane>
 
@@ -94,9 +104,7 @@
                    RelativePanel.AlignTopWithPanel="True" 
                    RelativePanel.AlignLeftWithPanel="True"
                    RelativePanel.AlignRightWithPanel="True"
-                   RelativePanel.Above="StatusBoder">
-
-                    </Frame>
+                   RelativePanel.Above="StatusBoder"/>
                     <StackPanel  Name="StatusBoder"
              
                      Background="{ThemeResource AppBarBackgroundThemeBrush}" 

@@ -46,14 +46,17 @@
         </DataTemplate>
 
     </Page.Resources>
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid>
+
+      
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
+        <StackPanel Grid.Row="0" Background="Transparent">
             <TextBlock Text="Click on Search Button to start Searching" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
             <RelativePanel HorizontalAlignment="Stretch">
                 <Button Name="Search_btn" Click="Search_btn_Click" Content="Search" HorizontalAlignment="Left"/>
