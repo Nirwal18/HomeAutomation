@@ -19,9 +19,10 @@
                        Margin="10,30,0,0"/>
 
         </StackPanel>
-
-        <ScrollViewer  Margin="10,20,0,0" Background="Transparent" IsEnabled="True" HorizontalScrollMode="Enabled">
-            <StackPanel Grid.Row="1" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+        <ScrollViewer Grid.Row="1">
+        <Grid>
+      
+            <StackPanel Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
                 <StackPanel Orientation="Vertical" Name="s1">
                     <ToggleSwitch Name="toggleSwicth1" OnContent="Light 1 On" OffContent="Light 1 Off" Toggled="ToggleSwitch1_Toggled"/>
                     <Border BorderThickness="0.5" BorderBrush="LightGray"/>
@@ -63,9 +64,9 @@
                     <Border BorderThickness="0.5" BorderBrush="LightGray"/>
                 </StackPanel>
             </StackPanel>
+
+        </Grid>
         </ScrollViewer>
-        
-         
-        
     </Grid>
+
 </Page>

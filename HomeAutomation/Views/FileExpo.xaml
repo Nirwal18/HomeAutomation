@@ -1,0 +1,36 @@
+﻿<Page
+    x:Class="HomeAutomation.Views.FileExpo"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HomeAutomation.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+   xmlns:data="using:Windows.Storage"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <DataTemplate x:Key="FolderList" x:DataType="data:StorageFolder">
+            <StackPanel>
+                <Image/>
+                <TextBlock Text="{x:Bind Name}"/>
+            </StackPanel>
+        </DataTemplate>
+    </Page.Resources>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer Grid.Column="0">
+            <ListBox x:Name="FolderListBox"
+                     Width="auto"
+                ItemTemplate="{StaticResource FolderList}">
+            </ListBox>
+        </ScrollViewer>
+        <Grid Grid.Column="1">
+            <Button Content="Open file Explorer" Click="Button_Click"/>
+        </Grid>
+        
+    </Grid>
+</Page>
