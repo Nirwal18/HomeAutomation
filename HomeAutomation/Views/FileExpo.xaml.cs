@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Navigation;
 using Windows.System;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.Storage.Search;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -34,6 +35,7 @@ namespace HomeAutomation.Views
         {
             StorageLibrary music1 = await StorageLibrary.GetLibraryAsync(KnownLibraryId.Music);
 
+
             List<StorageFolder> fl = new List<StorageFolder>();
 
             foreach (var folder in music1.Folders)
@@ -42,7 +44,23 @@ namespace HomeAutomation.Views
             }
 
             FolderListBox.ItemsSource = fl;
-           
+
+
+
+            StorageItemQueryResult f2 = fl[1].CreateItemQuery();
+
+            List<IStorageItem> fl2 = new List<IStorageItem>();
+            IReadOnlyList<IStorageItem> x= await f2.GetItemsAsync();
+
+            int i = 0;
+            foreach (var folder in x)
+            {
+              fl2.Add(x[i]);
+                i++;
+            }
+            FileListBox.ItemsSource = fl2;
+            //FileListBox.ItemsSource = lista;
         }
+
     }
 }

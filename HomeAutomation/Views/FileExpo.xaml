@@ -5,11 +5,17 @@
     xmlns:local="using:HomeAutomation.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-   xmlns:data="using:Windows.Storage"
+   xmlns:d1="using:Windows.Storage"
     mc:Ignorable="d">
 
     <Page.Resources>
-        <DataTemplate x:Key="FolderList" x:DataType="data:StorageFolder">
+        <DataTemplate x:Key="FolderList" x:DataType="d1:StorageFolder">
+            <StackPanel>
+                <Image/>
+                <TextBlock Text="{x:Bind Name}"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="FolderList2" x:DataType="d1:IStorageItem">
             <StackPanel>
                 <Image/>
                 <TextBlock Text="{x:Bind Name}"/>
@@ -20,6 +26,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
         <ScrollViewer Grid.Column="0">
@@ -28,7 +35,14 @@
                 ItemTemplate="{StaticResource FolderList}">
             </ListBox>
         </ScrollViewer>
-        <Grid Grid.Column="1">
+        <ScrollViewer Grid.Column="1">
+            <ListBox x:Name="FileListBox"
+                     Width="auto"
+                ItemTemplate="{StaticResource FolderList2}">
+            </ListBox>
+        </ScrollViewer>
+
+        <Grid Grid.Column="2">
             <Button Content="Open file Explorer" Click="Button_Click"/>
         </Grid>
         
