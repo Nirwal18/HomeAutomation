@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HomeAutomation.Model;
-using HomeAutomation.Views;
+//using HomeAutomation.Views;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
 
@@ -28,8 +28,7 @@ namespace HomeAutomation
             new Scenario(){Title="\u296E Connect and Pair",ClassType=typeof(Page1)},
             new Scenario() { Title = "\u2339 Control",ClassType = typeof(Page2)},
             new Scenario() { Title ="\u233E Game Controller",ClassType = typeof(GameController)},
-            new Scenario() { Title ="\u2699 Setting",ClassType = typeof(Page3)},
-            new Scenario(){ Title="Folder", ClassType=typeof(FileExpo)}
+            new Scenario() { Title ="\u2699 Setting",ClassType = typeof(Page3)}           
 
         };
     }

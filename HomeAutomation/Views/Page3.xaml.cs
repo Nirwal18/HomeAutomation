@@ -1,5 +1,10 @@
-﻿using Windows.UI.Xaml;
+﻿using System;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Microsoft.Toolkit.Uwp.Notifications;
+using Windows.UI.Notifications;
+using Windows.Data.Xml.Dom;
+using Windows.Storage;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -54,7 +59,7 @@ namespace HomeAutomation
                 localSettings.Values["toggleSwicth10"] = textBox10.Text;
                 rootPage.StatusBar("Saving Done for On Cmd.", BarStatus.Normal);
             }
-            else if(cmdOn_radio.IsChecked == false && cmdOff_radio.IsChecked == true)
+            else if (cmdOn_radio.IsChecked == false && cmdOff_radio.IsChecked == true)
             {
                 localSettings.Values["toggleSwicth1_off"] = textBox1.Text;
                 localSettings.Values["toggleSwicth2_off"] = textBox2.Text;
@@ -70,11 +75,11 @@ namespace HomeAutomation
             }
             else
             {
-                rootPage.StatusBar("Please Select 'On' and 'Off' option.",BarStatus.Warnning);
+                rootPage.StatusBar("Please Select 'On' and 'Off' option.", BarStatus.Warnning);
             }
-           
 
-          
+
+
         }
 
 
@@ -84,7 +89,7 @@ namespace HomeAutomation
             var applicationData = Windows.Storage.ApplicationData.Current;
             var localSettings = applicationData.LocalSettings;
 
-            if (localSettings.Values["toggleSwicth1"] == null || localSettings.Values["toggleSwicth1_off"]==null)
+            if (localSettings.Values["toggleSwicth1"] == null || localSettings.Values["toggleSwicth1_off"] == null)
             {
                 rootPage.StatusBar("First Save On & OFF command then retrive.", BarStatus.Warnning);
                 return;
@@ -102,7 +107,7 @@ namespace HomeAutomation
                 textBox8.Text = localSettings.Values["toggleSwicth8"].ToString();
                 textBox9.Text = localSettings.Values["toggleSwicth9"].ToString();
                 textBox10.Text = localSettings.Values["toggleSwicth10"].ToString();
-   
+
                 rootPage.StatusBar("Saving Done for On Cmd.", BarStatus.Normal);
             }
             else if (cmdOn_radio.IsChecked == false && cmdOff_radio.IsChecked == true)
@@ -123,7 +128,15 @@ namespace HomeAutomation
             else
             {
                 rootPage.StatusBar("Please Select 'On' and 'Off' option.", BarStatus.Warnning);
+
             }
+        }
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+            Model.BtNotification b = new Model.BtNotification();
+            b.tost();
+
         }
     }
 }

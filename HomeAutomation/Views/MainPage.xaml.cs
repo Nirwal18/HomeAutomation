@@ -62,10 +62,10 @@ namespace HomeAutomation
 
                 if (autoConnect_setting == true && rememberLastDevice_setting == true)
                 {
-                    if (await DeviceEventHandler.Current.ConnectAsyncFromId(localSettings.Values["LastDeviceId"].ToString()))
+                    /*if (await DeviceEventHandler.Current.ConnectAsyncFromId(localSettings.Values["LastDeviceId"].ToString()))
                     {
                         Frame_container.Navigate(typeof(Page2));
-                    }
+                    }*/
                 }
             }
         }

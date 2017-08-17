@@ -100,9 +100,12 @@
 
             <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
                 <Button Content="Save Command Values" Margin="5,10,0,0" Click="SaveCmd_button_Click"/>
-                <Button Content="Retrive values" Width="170" Margin="5,10,0,0" Click="Retrive_button_Click"/>
-            </StackPanel>
-            
+                    <Button Content="Retrive values" Width="170" Margin="5,10,0,0" Click="Retrive_button_Click"/>
+                </StackPanel>
+
+                <Button Click="Button_Click">
+                    Notification
+                </Button>
         </Grid>
 
 

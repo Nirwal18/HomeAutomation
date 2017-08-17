@@ -1,7 +1,9 @@
 ﻿{
   "dependencies": {
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.3.3",
-    "Microsoft.Toolkit.Uwp.UI": "1.4.1"
+    "Microsoft.Toolkit.Uwp.Notifications": "1.5.1",
+    "Microsoft.Toolkit.Uwp.Services": "1.5.1",
+    "Microsoft.Toolkit.Uwp.UI": "1.5.1"
   },
   "frameworks": {
     "uap10.0": {}
